@@ -1,0 +1,7 @@
+addReviewers: true
+addAssignees: author
+reviewers:
+  - Choiyu330
+  - kimmj13
+# Set 0 to add all the reviewers (default: 0)
+numberOfReviewers: 0

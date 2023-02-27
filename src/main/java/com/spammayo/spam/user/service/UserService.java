@@ -3,6 +3,7 @@ package com.spammayo.spam.user.service;
 import com.spammayo.spam.exception.BusinessLogicException;
 import com.spammayo.spam.exception.ExceptionCode;
 import com.spammayo.spam.security.utils.CustomAuthorityUtils;
+import com.spammayo.spam.security.utils.RedisUtils;
 import com.spammayo.spam.user.entity.User;
 import com.spammayo.spam.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,12 +27,15 @@ public class UserService {
     private final S3Service s3Service;
     private final PasswordEncoder passwordEncoder;
     private final CustomAuthorityUtils authorityUtils;
+    private final RedisUtils redisUtils;
 
     public User join(User user) {
         verifiedUser(user.getEmail());
 
-        if (userRepository.findByUserName(user.getUserName()).isPresent()) {
-            throw new BusinessLogicException(ExceptionCode.MEMBER_NAME_EXISTS);
+        //이메일 인증 여부 확인
+        Object authEmail = redisUtils.get("join_" + user.getEmail());
+        if (authEmail == null || !authEmail.toString().equals("confirm")) {
+            throw new BusinessLogicException(ExceptionCode.EMAIL_AUTH_REQUIRED);
         }
 
         List<String> roles = authorityUtils.createRoles(user.getEmail());
@@ -50,11 +54,7 @@ public class UserService {
         User findUser = existUser(user.getUserId());
 
         Optional.ofNullable(user.getUserName())
-                .ifPresent(name -> {
-                    if (userRepository.findByUserName(user.getUserName()).isPresent()) {
-                        throw new BusinessLogicException(ExceptionCode.MEMBER_NAME_EXISTS);
-                    } else findUser.setUserName(name);
-                });
+                .ifPresent(findUser::setUserName);
         Optional.ofNullable(user.getPassword())
                 .ifPresent(newPassword -> findUser.setPassword(passwordEncoder.encode(newPassword)));
         Optional.ofNullable(user.getField())
@@ -81,7 +81,7 @@ public class UserService {
         return userRepository.findById(userId).orElseThrow(() -> new BusinessLogicException(ExceptionCode.MEMBER_NOT_FOUND));
     }
 
-    private void verifiedUser(String email) {
+    public void verifiedUser(String email) {
         Optional<User> user = userRepository.findByEmail(email);
         if (user.isPresent()) {
             throw new BusinessLogicException(ExceptionCode.MEMBER_EXISTS);

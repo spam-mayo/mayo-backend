@@ -8,6 +8,7 @@ import com.spammayo.spam.security.auth.handler.MemberAuthenticationFailureHandle
 import com.spammayo.spam.security.auth.handler.MemberAuthenticationSuccessHandler;
 import com.spammayo.spam.security.auth.jwt.JwtTokenizer;
 import com.spammayo.spam.security.utils.CustomAuthorityUtils;
+import com.spammayo.spam.security.utils.RedisUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,6 +27,7 @@ public class SecurityConfiguration {
 
     private final JwtTokenizer jwtTokenizer;
     private final CustomAuthorityUtils authorityUtils;
+    private final RedisUtils redisUtils;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -41,14 +43,18 @@ public class SecurityConfiguration {
                 .authenticationEntryPoint(new MemberAuthenticationEntryPoint())
                 .accessDeniedHandler(new MemberAccessDeniedHandler())
                 .and()
+//                .logout()
+//                .logoutUrl("/logout")
+//                .logoutSuccessUrl("/")
+//                .and()
                 .apply(new CustomFilterConfigurer())
                 .and()
                 .authorizeHttpRequests(auth -> auth
                         .antMatchers(HttpMethod.GET, "/**").permitAll()
-                        .antMatchers(HttpMethod.POST, "/user/join", "/logout", "/token/reissue", "/email/**").permitAll()
+                        .antMatchers(HttpMethod.POST, "/user/join", "/token/reissue", "/email/**", "/find/password").permitAll()
                         .antMatchers(HttpMethod.DELETE, "/user").hasRole("USER")
                         .antMatchers("/h2/**").permitAll()
-                        .antMatchers("/login/**", "/oauth2/**", "/loading/**").permitAll()
+                        .antMatchers("/login/**", "/oauth2/**", "/loading/**", "/auth/**").permitAll()
                         .anyRequest().authenticated());
 
         return http.build();
@@ -65,12 +71,12 @@ public class SecurityConfiguration {
         public void configure(HttpSecurity builder) throws Exception {
             AuthenticationManager authenticationManager = builder.getSharedObject(AuthenticationManager.class);
 
-            JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(authenticationManager, jwtTokenizer);
+            JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(authenticationManager, jwtTokenizer, redisUtils);
             jwtAuthenticationFilter.setFilterProcessesUrl("/login");
             jwtAuthenticationFilter.setAuthenticationSuccessHandler(new MemberAuthenticationSuccessHandler());
             jwtAuthenticationFilter.setAuthenticationFailureHandler(new MemberAuthenticationFailureHandler());
 
-            JwtVerificationFilter jwtVerificationFilter = new JwtVerificationFilter(jwtTokenizer, authorityUtils);
+            JwtVerificationFilter jwtVerificationFilter = new JwtVerificationFilter(jwtTokenizer, authorityUtils, redisUtils);
 
             builder.addFilter(jwtAuthenticationFilter)
                     .addFilterAfter(jwtVerificationFilter, JwtAuthenticationFilter.class);

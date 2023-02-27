@@ -93,4 +93,10 @@ public class JwtTokenizer {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
+    public Long getExpiration(String token, String base64EncodedSecretKey) {
+        Key key = getKeyFromBase64EncodedKey(base64EncodedSecretKey);
+        Date expiration = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody().getExpiration();
+        Long now = new Date().getTime();
+        return (expiration.getTime() - now);
+    }
 }

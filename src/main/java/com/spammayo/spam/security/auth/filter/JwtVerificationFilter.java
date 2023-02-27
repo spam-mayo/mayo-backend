@@ -1,7 +1,10 @@
 package com.spammayo.spam.security.auth.filter;
 
+import com.spammayo.spam.exception.BusinessLogicException;
+import com.spammayo.spam.exception.ExceptionCode;
 import com.spammayo.spam.security.auth.jwt.JwtTokenizer;
 import com.spammayo.spam.security.utils.CustomAuthorityUtils;
+import com.spammayo.spam.security.utils.RedisUtils;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.security.SignatureException;
 import lombok.RequiredArgsConstructor;
@@ -24,11 +27,16 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
 
     private final JwtTokenizer jwtTokenizer;
     private final CustomAuthorityUtils authorityUtils;
+    private final RedisUtils redisUtils;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try {
             Map<String, Object> claims = verifyJws(request);
+
+            if (redisUtils.hasKeyBlackList(request.getHeader("Authorization").replace("Bearer ", ""))) {
+                throw new BusinessLogicException(ExceptionCode.UNAUTHORIZED);
+            }
             setAuthenticationToContext(claims);
         } catch (SignatureException se) {
             request.setAttribute("exception", se);

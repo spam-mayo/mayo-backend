@@ -7,15 +7,15 @@ phases:
   build:
     commands:
       - echo Build Starting on `date`
-      - cd DeployServer
+      - cd mayo-backend
       - chmod +x ./gradlew
       - ./gradlew build
   post_build:
     commands:
-      - echo $(basename ./DeployServer/build/libs/*.jar)
+      - echo $(basename ./mayo-backend/build/libs/*.jar)
 artifacts:
   files:
-    - DeployServer/build/libs/*.jar
-    - DeployServer/scripts/**
-    - DeployServer/appspec.yml
+    - mayo-backend/build/libs/*.jar
+    - mayo-backend/scripts/**
+    - mayo-backend/appspec.yml
   discard-paths: yes

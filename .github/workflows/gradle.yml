@@ -10,7 +10,7 @@ permissions:
 env:
   S3_BUCKET_NAME: spam-deploy
   
-jobs:
+jobs: 
   build:
     runs-on: ubuntu-latest
     steps:

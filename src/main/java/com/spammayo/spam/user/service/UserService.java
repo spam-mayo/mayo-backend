@@ -59,6 +59,8 @@ public class UserService {
                 .ifPresent(newPassword -> findUser.setPassword(passwordEncoder.encode(newPassword)));
         Optional.ofNullable(user.getField())
                 .ifPresent(findUser::setField);
+        Optional.ofNullable(user.getUserStacks())
+                .ifPresent(findUser::setUserStacks);
 
         return userRepository.save(findUser);
     }

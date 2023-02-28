@@ -3,6 +3,7 @@ package com.spammayo.spam.security.auth.filter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.spammayo.spam.security.auth.jwt.JwtTokenizer;
 import com.spammayo.spam.security.dto.LoginDto;
+import com.spammayo.spam.security.utils.RedisUtils;
 import com.spammayo.spam.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -25,6 +26,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     private final AuthenticationManager authenticationManager;
     private final JwtTokenizer jwtTokenizer;
+    private final RedisUtils redisUtils;
 
     @SneakyThrows
     @Override
@@ -45,7 +47,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         String accessToken = delegateAccessToken(user);
         String refreshToken = delegateRefreshToken(user);
 
-        response.setHeader("Authorization", "Bearer" + accessToken);
+        response.setHeader("Authorization", "Bearer " + accessToken);
         response.setHeader("Refresh", refreshToken);
 
         response.setContentType("application/json");
@@ -72,6 +74,11 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         String subject = user.getEmail();
         Date expiration = jwtTokenizer.getTokenExpiration(jwtTokenizer.getRefreshTokenExpirationMinutes());
         String encodeBase64SecretKey = jwtTokenizer.encodeBase64SecretKey(jwtTokenizer.getSecretKey());
-        return jwtTokenizer.generateRefreshToken(subject, expiration, encodeBase64SecretKey);
+        String refreshToken = jwtTokenizer.generateRefreshToken(subject, expiration, encodeBase64SecretKey);
+
+        //refresh 발급시 redis에 저장
+        redisUtils.set("refresh_" + user.getEmail(), refreshToken, jwtTokenizer.getRefreshTokenExpirationMinutes());
+
+        return refreshToken;
     }
 }

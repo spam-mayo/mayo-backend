@@ -12,7 +12,7 @@ public class UserDto {
     @Getter @Setter
     public static class PostDto {
 
-        //TODO : 이름 유효성 로직 확인
+        @Size(min = 2, max = 16)
         @NotBlank(message = "이름은 공백이 아니어야 합니다.")
         private String userName;
 
@@ -33,6 +33,7 @@ public class UserDto {
     public static class PatchDto {
         private Long userId;
 
+        @Size(min = 2, max = 16)
         private String userName;
 
         @Pattern(regexp = "(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[!@#$%^&]).{8,16}", message = "비밀번호는 영문, 특수문자, 숫자 포함 8-16자 이내여야 합니다.")

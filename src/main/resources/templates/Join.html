@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<body>
+<div style="margin:100px;">
+  <h1> 안녕하세요. SPAM-MAYO입니다. </h1>
+  <br>
+  <h2> 아래 코드를 회원가입 창으로 돌아가 입력해주세요. </h2>
+  <div>
+    <h2 style="color:skyblue"> 회원가입 인증 코드입니다. </h2>
+    <div style="font-size:130%" th:text="${code}"> </div>
+  </div>
+  <br>
+  <br>
+  <br/>
+  <img src="https://spam-image.s3.ap-northeast-2.amazonaws.com/SPAM_LOGO.png" width="600px" height="300px" alt="logo">
+  <br>
+</div>
+
+
+</body>
+</html>

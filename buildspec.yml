@@ -15,7 +15,7 @@ phases:
       - echo $(basename ./mayo-backend/build/libs/*.jar)
 artifacts:
   files:
-    - mayo-backend/build/libs/*.jar
-    - mayo-backend/scripts/**
-    - mayo-backend/appspec.yml
+    - project/mayo-backend/build/libs/*.jar
+    - project/mayo-backend/scripts/**
+    - project/mayo-backend/appspec.yml
   discard-paths: yes

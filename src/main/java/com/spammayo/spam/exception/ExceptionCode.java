@@ -27,11 +27,12 @@ public enum ExceptionCode {
     INVALID_PASSWORD (400, "Invalid Password"),
     MEMBER_NOT_LOGIN(400, "Member not login"),
     ID_NOT_EXIST(404, "Id not exist"),
+
     //study
-    BOARD_NOT_PATCHED(403, "Study not patched"),
-    BOARD_NOT_FOUND(404, "Study Not Found"),
-    BOARD_CHECK_EXISTS(409, "Study Check exists"),
-    BOARD_EXISTS(409, "Study exists"),
+    STUDY_NOT_PATCHED(403, "Study not patched"),
+    STUDY_NOT_FOUND(404, "Study Not Found"),
+    STUDY_CHECK_EXISTS(409, "Study Check exists"),
+    STUDY_EXISTS(409, "Study exists"),
 
     //offer
     OFFER_NOT_PATCHED(403, "Offer not patched"),
@@ -42,8 +43,13 @@ public enum ExceptionCode {
     //comment
     COMMENT_NOT_PATCHED(403, "Comment not patched"),
     COMMENT_NOT_FOUND(404, "Comment Not Found"),
-    COMMENT_CHECK_EXISTS(409, "Comment Check exists");
+    COMMENT_CHECK_EXISTS(409, "Comment Check exists"),
 
+    //stack
+    STACK_NOT_PATCHED(403, "Stack not patched"),
+    STACK_NOT_FOUND(404, "Stack Not Found"),
+    STACK_CHECK_EXISTS(409, "Stack Check exists"),
+    STACK_EXISTS(409, "Stack exists");
 
 
     @Getter

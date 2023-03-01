@@ -54,4 +54,9 @@ public class User extends Auditable {
         userStacks.add(userStack);
         userStack.setUser(this);
     }
+
+    public void addStudyUser(StudyUser studyUser) {
+        studyUsers.add(studyUser);
+        studyUser.setUser(this);
+    }
 }

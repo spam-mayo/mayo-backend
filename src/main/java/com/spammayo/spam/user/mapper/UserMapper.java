@@ -1,5 +1,6 @@
 package com.spammayo.spam.user.mapper;
 
+import com.spammayo.spam.stack.dto.StackDto;
 import com.spammayo.spam.stack.entity.Stack;
 import com.spammayo.spam.user.dto.UserDto;
 import com.spammayo.spam.user.entity.User;
@@ -26,7 +27,7 @@ public interface UserMapper {
         user.setUserName( patchDto.getUserName() );
         user.setPassword( patchDto.getPassword() );
         user.setField( patchDto.getField() );
-        List<UserDto.UserStackDto> userStacks = patchDto.getUserStacks();
+        List<StackDto> userStacks = patchDto.getUserStacks();
 
         if (userStacks != null) {
             userStacks.forEach(stacks -> {
@@ -49,7 +50,7 @@ public interface UserMapper {
         }
 
         UserDto.ResponseDto responseDto = new UserDto.ResponseDto();
-        List<UserDto.UserStackDto> stackList = new ArrayList<>();
+        List<StackDto> stackList = new ArrayList<>();
         responseDto.setUserId( user.getUserId() );
         responseDto.setUserName( user.getUserName() );
         responseDto.setEmail( user.getEmail() );
@@ -58,7 +59,7 @@ public interface UserMapper {
         Optional.ofNullable(user.getUserStacks())
                 .ifPresent(us -> us.forEach(userStack -> {
                     Stack stack = userStack.getStack();
-                    stackList.add(new UserDto.UserStackDto(stack.getStackId(), stack.getStackName()));
+                    stackList.add(new StackDto(stack.getStackId(), stack.getStackName()));
                 }));
         responseDto.setStack(stackList);
 

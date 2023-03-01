@@ -9,6 +9,7 @@ permissions:
 
 env:
   S3_BUCKET_NAME: spam-deploy
+  PROPERTIES_PATH: ./src/main/resources/application.properties
   
 jobs: 
   build:

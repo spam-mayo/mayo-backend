@@ -1,0 +1,21 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      java: corretto11
+  build:
+    commands:
+      - echo Build Starting on `date`
+      - cd mayo-backend
+      - chmod +x ./gradlew
+      - ./gradlew build
+  post_build:
+    commands:
+      - echo $(basename ./mayo-backend/build/libs/*.jar)
+artifacts:
+  files:
+    - project/mayo-backend/build/libs/*.jar
+    - project/mayo-backend/scripts/**
+    - project/mayo-backend/appspec.yml
+  discard-paths: yes

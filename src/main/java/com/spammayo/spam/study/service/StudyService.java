@@ -7,6 +7,7 @@ import com.spammayo.spam.study.entity.StudyUser;
 import com.spammayo.spam.study.repository.StudyRepository;
 import com.spammayo.spam.study.repository.StudyUserRepository;
 import com.spammayo.spam.user.entity.User;
+import com.spammayo.spam.user.repository.UserRepository;
 import com.spammayo.spam.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,9 +21,13 @@ public class StudyService {
     private final StudyRepository studyRepository;
     private final StudyUserRepository studyUserRepository;
     private final UserService userService;
+    //TODO: 추후 제거예
+    private final UserRepository userRepository;
 
     public Study createStudy(Study study) {
-        User user = userService.getLoginUser();
+        //TODO:추후 주석 해제예
+        User user = userRepository.findById(1L).orElseThrow(() -> new BusinessLogicException(ExceptionCode.MEMBER_NOT_FOUND));
+//        User user = userService.getLoginUser();
         StudyUser studyUser = new StudyUser();
         studyUser.setUser(user);
         studyUser.setAdmin(true);
@@ -43,7 +48,8 @@ public class StudyService {
 
     public void deleteStudy(long studyId) {
         Study study = existStudy(studyId);
-        accessResource(study);
+        //TODO : 추후 주석 해제예
+//        accessResource(study);
         studyRepository.delete(study);
     }
 

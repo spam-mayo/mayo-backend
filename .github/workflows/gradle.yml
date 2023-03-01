@@ -51,4 +51,4 @@ jobs:
         aws deploy create-deployment --application-name spam-deploy
         --deployment-config-name CodeDeployDefault.AllAtOnce
         --deployment-group-name spam-deploy-group
-        --s3-location bucket=$S3_BUCKET_NAME,bundleType=zip,key=spam-deploy.zip    
+        --s3-location bucket=spam-deploy,bundleType=zip,key=spam-deploy.zip    

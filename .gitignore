@@ -1,7 +1,6 @@
 HELP.md
 .gradle
 build/
-!gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
 
@@ -39,7 +38,7 @@ out/
 ### yml 파일 ###
 application.yml
 application-local.yml
-#application.properties
+application.properties
 application-server.yml
 
 # Created by https://www.toptal.com/developers/gitignore/api/intellij,java
@@ -172,7 +171,6 @@ fabric.properties
 .mtj.tmp/
 
 # Package Files #
-*.jar
 *.war
 *.nar
 *.ear

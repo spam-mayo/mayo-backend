@@ -9,5 +9,5 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface StackMapper {
 
-    List<StackDto.ResponseDto> stacksToResponseDto(List<Stack> stacks);
+    List<StackDto> stacksToResponseDto(List<Stack> stacks);
 }

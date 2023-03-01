@@ -1,6 +1,7 @@
 package com.spammayo.spam.user.entity;
 
 import com.spammayo.spam.audit.Auditable;
+import com.spammayo.spam.study.entity.StudyUser;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -46,8 +47,16 @@ public class User extends Auditable {
     @OneToMany(mappedBy = "user", cascade = { CascadeType.ALL })
     private List<UserStack> userStacks = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user")
+    private List<StudyUser> studyUsers = new ArrayList<>();
+
     public void addUserStack(UserStack userStack) {
         userStacks.add(userStack);
         userStack.setUser(this);
+    }
+
+    public void addStudyUser(StudyUser studyUser) {
+        studyUsers.add(studyUser);
+        studyUser.setUser(this);
     }
 }

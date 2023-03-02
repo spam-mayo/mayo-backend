@@ -44,11 +44,18 @@ jobs:
         spring.mail.username=${{ secrets.MAIL_USERNAME }}
         spring.mail.password=${{ secrets.MAIL_PASSWORD }}
         cloud.aws.credentials.access-key=${{ secrets.S3_ACCESS_KEY }}
-        cloud.aws.credentials.secret-key=${{ secrets.S3_SECRET_KEY }}
+        cloud.aws.credentials.secret-key=${{ secrets.S3_SECRET_KEY }} > s3-secret.json
         cloud.aws.s3.bucket=${{ secrets.S3_BUCKET }}
         config.domain=${{ secrets.DOMAIN }}
         " >> ${{ env.PROPERTIES_PATH }}
     
+    - name: Set s3_json
+      id: create-json
+      uses: jsdaniell/create-json@1.1.2
+      with:
+        name: "s3-secret.json"
+        json: ${{ secrets.S3_SECRET_KEY }}
+        
     # build한 후 프로젝트를 압축합니다.
     - name: Make zip file
       run: zip -r ./spam-deploy.zip .

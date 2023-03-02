@@ -76,9 +76,8 @@ public class GlobalExceptionAdvice {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleExpiredJwtException(MethodArgumentTypeMismatchException e) {
+    public ErrorResponse handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e) {
         log.error("MethodArgumentTypeMismatchException", e);
         return ErrorResponse.of(e.getMessage());
     }
-
 }

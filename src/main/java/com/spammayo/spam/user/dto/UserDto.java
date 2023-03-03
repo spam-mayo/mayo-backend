@@ -1,11 +1,14 @@
 package com.spammayo.spam.user.dto;
 
-import lombok.AllArgsConstructor;
+import com.spammayo.spam.stack.dto.StackDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.validation.constraints.*;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 import java.util.List;
 
 public class UserDto {
@@ -41,7 +44,7 @@ public class UserDto {
         @Pattern(regexp = "(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[!@#$%^&]).{8,16}", message = "비밀번호는 영문, 특수문자, 숫자 포함 8-16자 이내여야 합니다.")
         private String password;
         private String field;
-        private List<UserStackDto> userStacks;
+        private List<StackDto> userStacks;
     }
 
     @NoArgsConstructor
@@ -59,14 +62,6 @@ public class UserDto {
         private String email;
         private String profileUrl;
         private String field;
-        private List<UserStackDto> stack;
-    }
-
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Getter @Setter
-    public static class UserStackDto {
-        private Long stackId;
-        private String stack;
+        private List<StackDto> stack;
     }
 }

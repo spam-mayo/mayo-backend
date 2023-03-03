@@ -46,6 +46,7 @@ public class SecurityConfiguration {
                 .apply(new CustomFilterConfigurer())
                 .and()
                 .authorizeHttpRequests(auth -> auth
+                        .antMatchers("/**").permitAll() //TODO : 추후 삭제예
                         .antMatchers(HttpMethod.GET, "/**").permitAll()
                         .antMatchers(HttpMethod.POST, "/user/join", "/token/reissue", "/email/**", "/find/password").permitAll()
                         .antMatchers(HttpMethod.DELETE, "/user").hasRole("USER")

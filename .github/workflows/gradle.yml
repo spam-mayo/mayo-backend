@@ -10,7 +10,7 @@ permissions:
 env:
   S3_BUCKET_NAME: spam-deploy
   PROPERTIES_PATH: ./src/main/resources/application.properties
-  working-directory: ./
+
   
 jobs: 
   build:
@@ -24,7 +24,7 @@ jobs:
         distribution: 'temurin'
     - name: Add permission
       run: chmod +x ./gradlew
-      working-directory: ${{ env.working-directory }}
+
     - name: Build with Gradle
       uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
       with:
@@ -50,7 +50,11 @@ jobs:
         cloud.aws.s3.bucket=${{ secrets.S3_BUCKET }}
         config.domain=${{ secrets.DOMAIN }}
         " >> ${{ env.PROPERTIES_PATH }}
-    
+        
+    # 빌드
+    - name: Build with Gradle
+      run: ./gradlew clean build
+      
     # build한 후 프로젝트를 압축합니다.
     - name: Make zip file
       run: zip -r ./spam-deploy.zip .
@@ -77,6 +81,3 @@ jobs:
         --deployment-group-name spam-deploy-group
         --s3-location bucket=spam-deploy,bundleType=zip,key=spam-deploy.zip    
 
-    - name: Build with Gradle
-      run: ./gradlew clean build
-      working-directory: ${{ env.working-directory }}

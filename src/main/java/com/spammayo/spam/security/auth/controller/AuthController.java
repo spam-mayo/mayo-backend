@@ -48,8 +48,8 @@ public class AuthController {
     }
 
     //랜덤 링크를 통한 비밀번호 변경
-    @PostMapping("/password/{random-code}")
-    public ResponseEntity authPasswordUrl(@PathVariable("random-code") String randomCode,
+    @PostMapping("/password")
+    public ResponseEntity authPasswordUrl(@RequestParam @NotBlank String randomCode,
                                           @RequestBody @Valid AuthDto.PasswordDto passwordDto) {
         String firstPassword = passwordDto.getFirstPassword();
         String secondPassword = passwordDto.getSecondPassword();

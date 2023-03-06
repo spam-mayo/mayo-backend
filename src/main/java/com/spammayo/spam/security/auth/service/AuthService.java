@@ -160,7 +160,7 @@ public class AuthService {
 
     private String setPasswordContext(String authCode) {
         Context context = new Context();
-        context.setVariable("link", "http://localhost:8080/auth/password/" + authCode);
+        context.setVariable("link", "http://ec2-3-38-166-165.ap-northeast-2.compute.amazonaws.com:8080/auth/password?randomCode=" + authCode);
         return templateEngine.process("NewPassword", context);
     }
 

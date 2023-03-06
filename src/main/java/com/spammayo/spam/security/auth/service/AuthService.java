@@ -15,6 +15,7 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.io.DecodingException;
 import io.jsonwebtoken.security.SignatureException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.thymeleaf.context.Context;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -30,6 +31,7 @@ import java.util.*;
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService {
 
     private final UserService userService;
@@ -145,6 +147,16 @@ public class AuthService {
         return mimeMessage;
     }
 
+    private MimeMessage createQueryForm(String content) throws MessagingException {
+        String userEmail = userService.getLoginUser().getEmail();
+        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+        mimeMessage.addRecipients(MimeMessage.RecipientType.TO, teamEmail);
+        mimeMessage.setSubject(userEmail + " 회원으로부터 문의사항이 도착했습니다.");
+        mimeMessage.setText(userEmail + " 회원으로부터 문의사항이 도착했습니다."
+                + "<br>" + "문의내용 : " + content, "utf-8", "html");
+        return mimeMessage;
+    }
+
 
     private String setPasswordContext(String authCode) {
         Context context = new Context();
@@ -168,5 +180,11 @@ public class AuthService {
         userService.verifiedUser(userEmail);
         MimeMessage emailForm = createJoinForm(userEmail);
         javaMailSender.send(emailForm);
+    }
+
+    public void sendEmailForQuery(String content) throws MessagingException {
+        MimeMessage queryForm = createQueryForm(content);
+        javaMailSender.send(queryForm);
+        log.info("회원으로부터 문의메일 도착");
     }
 }

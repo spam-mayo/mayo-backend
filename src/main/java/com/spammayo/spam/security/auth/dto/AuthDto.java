@@ -2,7 +2,6 @@ package com.spammayo.spam.security.auth.dto;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
@@ -39,4 +38,10 @@ public class AuthDto {
         private String authCode;
     }
 
+    @NoArgsConstructor
+    @Getter
+    public static class EmailQuestionDto {
+        @NotBlank(message = "내용을 입력하세요.")
+        private String content;
+    }
 }

@@ -7,6 +7,7 @@ import com.spammayo.spam.security.utils.RedisUtils;
 import com.spammayo.spam.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -22,6 +23,7 @@ import java.util.Date;
 import java.util.HashMap;
 
 @RequiredArgsConstructor
+@Slf4j
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
@@ -31,11 +33,18 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     @SneakyThrows
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        LoginDto loginDto = objectMapper.readValue(request.getInputStream(), LoginDto.class);
+        LoginDto loginDto = new LoginDto();
+        UsernamePasswordAuthenticationToken authenticationToken;
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            loginDto = objectMapper.readValue(request.getInputStream(), LoginDto.class);
 
-        UsernamePasswordAuthenticationToken authenticationToken
-                = new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword());
+        } catch (Exception e) {
+            log.info(e.getMessage());
+        } finally {
+            authenticationToken
+                    = new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword());
+        }
 
         return authenticationManager.authenticate(authenticationToken);
     }

@@ -1,12 +1,16 @@
 package com.spammayo.spam.security.auth.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.spammayo.spam.exception.ErrorResponse;
+import com.spammayo.spam.exception.ExceptionCode;
 import com.spammayo.spam.security.auth.jwt.JwtTokenizer;
 import com.spammayo.spam.security.dto.LoginDto;
 import com.spammayo.spam.security.utils.RedisUtils;
 import com.spammayo.spam.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -37,7 +41,13 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         UsernamePasswordAuthenticationToken authenticationToken
                 = new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword());
 
-        return authenticationManager.authenticate(authenticationToken);
+        try{
+            return authenticationManager.authenticate(authenticationToken);
+        }
+        catch (IllegalArgumentException e){
+            sendErrorResponse(response);
+        }
+        return null;
     }
 
     @Override
@@ -80,5 +90,15 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         redisUtils.set("refresh_" + user.getEmail(), refreshToken, jwtTokenizer.getRefreshTokenExpirationMinutes());
 
         return refreshToken;
+    }
+
+    private void sendErrorResponse(HttpServletResponse response) throws IOException {
+        ExceptionCode exceptionCode = ExceptionCode.UNAUTHORIZED;
+
+        Gson gson = new Gson();
+        ErrorResponse errorResponse = ErrorResponse.of(exceptionCode);
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setStatus(exceptionCode.getStatus());
+        response.getWriter().write(gson.toJson(errorResponse, ErrorResponse.class));
     }
 }

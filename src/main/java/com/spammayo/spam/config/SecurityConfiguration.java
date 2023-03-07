@@ -7,8 +7,10 @@ import com.spammayo.spam.security.auth.handler.MemberAuthenticationEntryPoint;
 import com.spammayo.spam.security.auth.handler.MemberAuthenticationFailureHandler;
 import com.spammayo.spam.security.auth.handler.MemberAuthenticationSuccessHandler;
 import com.spammayo.spam.security.auth.jwt.JwtTokenizer;
+import com.spammayo.spam.security.auth.handler.OAuth2MemberSuccessHandler;
 import com.spammayo.spam.security.utils.CustomAuthorityUtils;
 import com.spammayo.spam.security.utils.RedisUtils;
+import com.spammayo.spam.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,6 +32,7 @@ public class SecurityConfiguration {
     private final JwtTokenizer jwtTokenizer;
     private final CustomAuthorityUtils authorityUtils;
     private final RedisUtils redisUtils;
+    private final UserRepository userRepository;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -55,7 +58,11 @@ public class SecurityConfiguration {
                         .antMatchers(HttpMethod.DELETE, "/user").hasRole("USER")
                         .antMatchers("/h2/**").permitAll()
                         .antMatchers("/login/**", "/oauth2/**", "/loading/**", "/auth/**").permitAll()
-                        .anyRequest().authenticated());
+                        .anyRequest().authenticated()
+                )
+                .oauth2Login(oauth2 -> oauth2
+                        .successHandler(new OAuth2MemberSuccessHandler(jwtTokenizer, userRepository, redisUtils))
+                );
 
         return http.build();
 

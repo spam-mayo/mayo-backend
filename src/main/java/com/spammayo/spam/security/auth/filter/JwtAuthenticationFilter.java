@@ -1,9 +1,6 @@
 package com.spammayo.spam.security.auth.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
-import com.spammayo.spam.exception.ErrorResponse;
-import com.spammayo.spam.exception.ExceptionCode;
 import com.spammayo.spam.security.auth.jwt.JwtTokenizer;
 import com.spammayo.spam.security.dto.LoginDto;
 import com.spammayo.spam.security.utils.RedisUtils;

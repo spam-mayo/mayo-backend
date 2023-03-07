@@ -113,8 +113,8 @@ public class OAuth2MemberSuccessHandler extends SimpleUrlAuthenticationSuccessHa
 
         return UriComponentsBuilder
                 .newInstance()
-                .scheme("http")
-                .host("spam-deploy.s3.ap-northeast-2.amazonaws.com")
+                .scheme("https")
+                .host("https://mayo-frontend-47zd.vercel.app/")
                 .port(80)
                 .path("/loading")
                 .queryParams(queryParams)

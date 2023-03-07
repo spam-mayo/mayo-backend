@@ -70,7 +70,7 @@ public class OAuth2MemberSuccessHandler extends SimpleUrlAuthenticationSuccessHa
         }
 
         User user = userRepository.findByEmail(username).get();
-        String uri = createURI("Bearer " + accessToken, refreshToken, user.getUserId()).toString();   //
+        String uri = createURI("Bearer " + accessToken, refreshToken, user.getUserId()).toString();
 
         getRedirectStrategy().sendRedirect(request, response, uri);
     }
@@ -87,7 +87,7 @@ public class OAuth2MemberSuccessHandler extends SimpleUrlAuthenticationSuccessHa
 
         String accessToken = jwtTokenizer.generateAccessToken(claims, subject, expiration, base64EncodedSecretKey);
 
-        System.out.println("--- 액세스 토큰 생성완료 ---");
+        log.info("--- 액세스 토큰 생성완료 ---");
 
         return accessToken;
     }
@@ -114,8 +114,8 @@ public class OAuth2MemberSuccessHandler extends SimpleUrlAuthenticationSuccessHa
         return UriComponentsBuilder
                 .newInstance()
                 .scheme("http")
-                .host("localhost") // TODO: S3 주소변경
-//                .port(80)
+                .host("spam-deploy.s3.ap-northeast-2.amazonaws.com")
+                .port(80)
                 .path("/loading")
                 .queryParams(queryParams)
                 .build()

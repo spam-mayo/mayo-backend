@@ -1,7 +1,5 @@
 package com.spammayo.spam.security.auth.controller;
 
-import com.spammayo.spam.exception.BusinessLogicException;
-import com.spammayo.spam.exception.ExceptionCode;
 import com.spammayo.spam.security.auth.dto.AuthDto;
 import com.spammayo.spam.security.auth.service.AuthService;
 import lombok.RequiredArgsConstructor;
@@ -49,14 +47,9 @@ public class AuthController {
 
     //랜덤 링크를 통한 비밀번호 변경
     @PostMapping("/password")
-    public ResponseEntity authPasswordUrl(@RequestParam @NotBlank String randomCode,
+    public ResponseEntity authPasswordUrl(@RequestParam @NotBlank String authCode,
                                           @RequestBody @Valid AuthDto.PasswordDto passwordDto) {
-        String firstPassword = passwordDto.getFirstPassword();
-        String secondPassword = passwordDto.getSecondPassword();
-        if (!firstPassword.equals(secondPassword)) {
-            throw new BusinessLogicException(ExceptionCode.INVALID_VALUES);
-        }
-        authService.setNewPassword(randomCode, firstPassword);
+        authService.setNewPassword(authCode, passwordDto.getNewPassword());
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

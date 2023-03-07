@@ -1,23 +1,22 @@
 package com.spammayo.spam.security.auth.controller;
 
-import com.spammayo.spam.exception.BusinessLogicException;
-import com.spammayo.spam.exception.ExceptionCode;
 import com.spammayo.spam.security.auth.dto.AuthDto;
 import com.spammayo.spam.security.auth.service.AuthService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
-@Slf4j
+@Validated
 public class AuthController {
 
     private final AuthService authService;
@@ -41,34 +40,36 @@ public class AuthController {
 
     //비밀번호 찾기시 랜덤 링크 전송
     @PostMapping("/email/password")
-    public ResponseEntity findPassword(@RequestBody AuthDto.EmailDto emailDto) throws MessagingException {
+    public ResponseEntity findPassword(@RequestBody @Valid AuthDto.EmailDto emailDto) throws MessagingException {
         authService.sendEmailForPassword(emailDto.getEmail());
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     //랜덤 링크를 통한 비밀번호 변경
-    @PostMapping("/password/{random-code}")
-    public ResponseEntity authPasswordUrl(@PathVariable("random-code") String randomCode,
-                                          @RequestBody AuthDto.PasswordDto passwordDto) {
-        String firstPassword = passwordDto.getFirstPassword();
-        String secondPassword = passwordDto.getSecondPassword();
-        if (!firstPassword.equals(secondPassword)) {
-            throw new BusinessLogicException(ExceptionCode.INVALID_VALUES);
-        }
-        authService.setNewPassword(randomCode, firstPassword);
+    @PostMapping("/password")
+    public ResponseEntity authPasswordUrl(@RequestParam @NotBlank String authCode,
+                                          @RequestBody @Valid AuthDto.PasswordDto passwordDto) {
+        authService.setNewPassword(authCode, passwordDto.getNewPassword());
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     //회원가입 이메일 인증번호 전송
     @PostMapping("/email")
-    public ResponseEntity authEmail(@RequestBody AuthDto.EmailDto emailDto) throws MessagingException {
+    public ResponseEntity authEmail(@RequestBody @Valid AuthDto.EmailDto emailDto) throws MessagingException {
         authService.sendEmailForJoin(emailDto.getEmail());
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PostMapping("/email/confirm")
-    public ResponseEntity confirmEmail(@RequestBody AuthDto.EmailConfirmDto confirmDto) {
+    public ResponseEntity confirmEmail(@RequestBody @Valid AuthDto.EmailConfirmDto confirmDto) {
         authService.authorizedEmail(confirmDto.getAuthCode(), confirmDto.getEmail());
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    //관리자에게 문의하기
+    @PostMapping("/email/query")
+    public ResponseEntity queryEmail(@RequestBody @Valid AuthDto.EmailQuestionDto questionDto) throws MessagingException {
+        authService.sendEmailForQuery(questionDto.getContent());
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

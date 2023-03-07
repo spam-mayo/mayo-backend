@@ -16,25 +16,22 @@ public class StudyDto {
     @Setter
     public static class InputDto {
 
-        private long studyId;
-
-        @NotBlank
+        @NotBlank(message = "스터디명은 공란일 수 없습니다.")
         private String studyName;
 
-        //TODO : 타이틀 여부 확인 필요
-        @NotBlank
+        @NotBlank(message = "스터디 제목은 공란일 수 없습니다.")
         private String title;
 
-        @NotBlank
+        @NotBlank(message = "시작일자는 공란일 수 없습니다.")
         private String startDate;
 
-        @NotBlank
+        @NotBlank(message = "종료일자는 공란일 수 없습니다.")
         private String endDate;
 
-        @NotBlank
+        @NotBlank(message = "모집인원은 공란일 수 없습니다.")
         private String personnel;
 
-        @NotBlank
+        private boolean online;
         private String place;
 
         private String placeDetails;
@@ -51,23 +48,19 @@ public class StudyDto {
 
         private long studyId;
 
-        @NotBlank
+        @NotBlank(message = "스터디명은 공란일 수 없습니다.")
         private String studyName;
 
-        //TODO : 타이틀 여부 확인 필요
-        @NotBlank
-        private String title;
-
-        @NotBlank
+        @NotBlank(message = "시작일자는 공란일 수 없습니다.")
         private String startDate;
 
-        @NotBlank
+        @NotBlank(message = "종료일자는 공란일 수 없습니다.")
         private String endDate;
 
-        @NotBlank
+        @NotBlank(message = "모집인원은 공란일 수 없습니다.")
         private String personnel;
 
-        @NotBlank
+        private boolean online;
         private String place;
 
         private String placeDetails;
@@ -88,7 +81,7 @@ public class StudyDto {
     @NoArgsConstructor
     @Getter
     @Setter
-    public static class ResponseDto {
+public static class ResponseDto {
         private Long studyId;
         private String studyName;
         private String title;
@@ -101,10 +94,47 @@ public class StudyDto {
         private String activity;
         private String period;
         private Study.StudyStatus studyStatus;
+        private boolean online;
+        private boolean checkLikes;
         private List<StackDto> stack;
+
+        //admin
+        private long userId;
+        private String userName;
+        private String email;
+        private String field;
+        private String userProfileUrl;
 
         public String getStudyStatus() {
             return studyStatus.getStatus();
         }
+    }
+
+    @NoArgsConstructor
+    @Getter @Setter
+    public static class ListResponseDto {
+        private Long studyId;
+        private String title;
+        private String startDate;
+        private String endDate;
+        private Study.StudyStatus studyStatus;
+        private boolean online;
+        private List<StackDto> stack;
+
+        //admin
+        private long userId;
+        private String userName;
+        private String userProfileUrl;
+
+        public String getStudyStatus() {
+            return studyStatus.getStatus();
+        }
+    }
+
+    @NoArgsConstructor
+    @Getter @Setter
+    public static class NoticeDto {
+        private long studyId;
+        private String notice;
     }
 }

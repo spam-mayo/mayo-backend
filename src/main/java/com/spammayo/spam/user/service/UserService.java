@@ -33,10 +33,10 @@ public class UserService {
         verifiedUser(user.getEmail());
 
         //이메일 인증 여부 확인
-        Object authEmail = redisUtils.get("join_" + user.getEmail());
-        if (authEmail == null || !authEmail.toString().equals("confirm")) {
-            throw new BusinessLogicException(ExceptionCode.EMAIL_AUTH_REQUIRED);
-        }
+//        Object authEmail = redisUtils.get("join_" + user.getEmail());
+//        if (authEmail == null || !authEmail.toString().equals("confirm")) {
+//            throw new BusinessLogicException(ExceptionCode.EMAIL_AUTH_REQUIRED);
+//        }
 
         List<String> roles = authorityUtils.createRoles(user.getEmail());
         user.setRoles(roles);
@@ -57,7 +57,10 @@ public class UserService {
         Optional.ofNullable(user.getUserName())
                 .ifPresent(findUser::setUserName);
         Optional.ofNullable(user.getPassword())
-                .ifPresent(newPassword -> findUser.setPassword(passwordEncoder.encode(newPassword)));
+                .ifPresent(newPassword -> {
+                    isSocialUser(findUser);
+                    findUser.setPassword(passwordEncoder.encode(newPassword));
+                });
         Optional.ofNullable(user.getField())
                 .ifPresent(findUser::setField);
         Optional.ofNullable(user.getUserStacks())
@@ -129,8 +132,14 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    private static void setBasicImage(User user) {
+    private void setBasicImage(User user) {
         user.setProfileUrl("https://spam-image.s3.ap-northeast-2.amazonaws.com/basic.png");
         user.setProfileKey("basic");
+    }
+
+    public void isSocialUser(User user) {
+        if (user.getPassword().equals("GOOGLE") || user.getPassword().equals("KAKAO")) {
+            throw new BusinessLogicException(ExceptionCode.ACCESS_FORBIDDEN);
+        }
     }
 }

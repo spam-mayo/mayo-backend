@@ -171,7 +171,8 @@ public class AuthService {
     }
 
     public void sendEmailForPassword(String userEmail) throws MessagingException {
-        userRepository.findByEmail(userEmail).orElseThrow(() -> new BusinessLogicException(ExceptionCode.MEMBER_NOT_FOUND));
+        User user = userRepository.findByEmail(userEmail).orElseThrow(() -> new BusinessLogicException(ExceptionCode.MEMBER_NOT_FOUND));
+        userService.isSocialUser(user);
         MimeMessage emailForm = createNewPasswordForm(userEmail);
         javaMailSender.send(emailForm);
     }

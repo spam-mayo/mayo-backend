@@ -1,4 +1,4 @@
-package com.spammayo.spam.studytodo.dto;
+package com.spammayo.spam.task.dto;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -6,39 +6,39 @@ import lombok.Setter;
 
 import javax.validation.constraints.NotBlank;
 
-public class StudyTodoDto {
+public class TaskDto {
 
     @NoArgsConstructor
     @Getter @Setter
     public static class PostDto {
         @NotBlank
-        private String todoDate;
+        private String TaskDate;
 
         @NotBlank
-        private String todo;
+        private String Task;
     }
 
     @NoArgsConstructor
     @Getter @Setter
     public static class PatchDto {
-        private long studyTodoId;
+        private long TaskId;
 
         @NotBlank
-        private String todo;
+        private String Task;
     }
 
     @NoArgsConstructor
     @Getter @Setter
     public static class SimpleResponseDto {
-        private long studyTodoId;
+        private long TaskId;
     }
 
     @NoArgsConstructor
     @Getter @Setter
     public static class ResponseDto {
-        private long studyTodoId;
-        private String todoDate;
-        private String todo;
+        private long TaskId;
+        private String TaskDate;
+        private String Task;
     }
 
 }

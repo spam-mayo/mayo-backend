@@ -52,11 +52,11 @@ public enum ExceptionCode {
     STACK_CHECK_EXISTS(409, "Stack Check exists"),
     STACK_EXISTS(409, "Stack exists"),
 
-    //study_todo
-    TODO_NOT_PATCHED(403, "Todo not patched"),
-    TODO_NOT_FOUND(404, "Todo Not Found"),
-    TODO_CHECK_EXISTS(409, "Todo Check exists"),
-    TODO_EXISTS(409, "Todo exists");
+    //study_Task
+    TASK_NOT_PATCHED(403, "Task not patched"),
+    TASK_NOT_FOUND(404, "Task Not Found"),
+    TASK_CHECK_EXISTS(409, "Task Check exists"),
+    TASK_EXISTS(409, "Task exists");
 
 
     @Getter

@@ -2,7 +2,7 @@ package com.spammayo.spam.study.entity;
 
 import com.spammayo.spam.likes.Like;
 import com.spammayo.spam.offer.entity.Offer;
-import com.spammayo.spam.studytodo.entity.StudyTodo;
+import com.spammayo.spam.task.entity.Task;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -67,7 +67,7 @@ public class Study {
     private Offer offer;
 
     @OneToMany(mappedBy = "study", cascade = CascadeType.REMOVE)
-    private List<StudyTodo> studyTodos = new ArrayList<>();
+    private List<Task> tasks = new ArrayList<>();
 
     public void addStudyStack(StudyStack studyStack) {
         studyStacks.add(studyStack);
@@ -84,9 +84,9 @@ public class Study {
         like.setStudy(this);
     }
 
-    public void addStudyTodo(StudyTodo studyTodo) {
-        studyTodos.add(studyTodo);
-        studyTodo.setStudy(this);
+    public void addTask(Task Task) {
+        tasks.add(Task);
+        Task.setStudy(this);
     }
 
     public enum StudyStatus {

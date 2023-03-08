@@ -52,20 +52,17 @@ public class SecurityConfiguration {
                 .apply(new CustomFilterConfigurer())
                 .and()
                 .authorizeHttpRequests(auth -> auth
-                        .antMatchers("/**").permitAll() //TODO : 추후 삭제예
                         .antMatchers(HttpMethod.GET, "/**").permitAll()
-                        .antMatchers(HttpMethod.POST, "/user/join", "/token/reissue", "/email/**", "/find/password").permitAll()
-                        .antMatchers(HttpMethod.DELETE, "/user").hasRole("USER")
+                        .antMatchers(HttpMethod.POST, "/api/users/join", "/api/auth/token/reissue", "/api/auth/email/**", "/api/auth/password/**").permitAll()
+                        .antMatchers(HttpMethod.DELETE, "/api/users").hasRole("USER")
                         .antMatchers("/h2/**").permitAll()
-                        .antMatchers("/login/**", "/oauth2/**", "/loading/**", "/auth/**").permitAll()
+                        .antMatchers("/oauth2/**", "/loading/**", "/api/auth/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
                         .successHandler(new OAuth2MemberSuccessHandler(jwtTokenizer, userRepository, redisUtils))
                 );
-
         return http.build();
-
     }
 
     @Bean
@@ -79,7 +76,7 @@ public class SecurityConfiguration {
             AuthenticationManager authenticationManager = builder.getSharedObject(AuthenticationManager.class);
 
             JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(authenticationManager, jwtTokenizer, redisUtils);
-            jwtAuthenticationFilter.setFilterProcessesUrl("/login");
+            jwtAuthenticationFilter.setFilterProcessesUrl("/api/auth/login");
             jwtAuthenticationFilter.setAuthenticationSuccessHandler(new MemberAuthenticationSuccessHandler());
             jwtAuthenticationFilter.setAuthenticationFailureHandler(new MemberAuthenticationFailureHandler());
 

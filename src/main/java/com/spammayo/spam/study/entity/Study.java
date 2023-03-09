@@ -52,7 +52,12 @@ public class Study {
     @Column(nullable = false)
     private boolean online;
 
-    private String notice;
+    private long views;
+
+    //notice
+    private String noticeTitle;
+
+    private String noticeContent;
 
     @OneToMany(mappedBy = "study", cascade = CascadeType.ALL)
     private List<StudyStack> studyStacks = new ArrayList<>();
@@ -93,7 +98,7 @@ public class Study {
 
         BEFORE_RECRUITMENT("모집전"),
         RECRUITING("모집중"),
-        PROCEEDING("진행중"),
+        ONGOING("진행중"),
         END("종료"),
         CLOSED("폐쇄");
 

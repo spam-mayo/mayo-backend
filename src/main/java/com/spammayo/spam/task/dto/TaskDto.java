@@ -12,33 +12,32 @@ public class TaskDto {
     @Getter @Setter
     public static class PostDto {
         @NotBlank
-        private String TaskDate;
+        private String taskDate;
 
         @NotBlank
-        private String Task;
+        private String task;
     }
 
     @NoArgsConstructor
     @Getter @Setter
     public static class PatchDto {
-        private long TaskId;
+        private long taskId;
 
         @NotBlank
-        private String Task;
+        private String task;
     }
 
     @NoArgsConstructor
     @Getter @Setter
     public static class SimpleResponseDto {
-        private long TaskId;
+        private long taskId;
     }
 
     @NoArgsConstructor
     @Getter @Setter
     public static class ResponseDto {
-        private long TaskId;
-        private String TaskDate;
-        private String Task;
+        private long taskId;
+        private String taskDate;
+        private String task;
     }
-
 }

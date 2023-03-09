@@ -64,4 +64,16 @@ public class UserDto {
         private String field;
         private List<StackDto> stack;
     }
+
+    //스터디원 목록 조회
+    @NoArgsConstructor
+    @Getter @Setter
+    public static class ListResponseDto {
+        private Long userId;
+        private String userName;
+        private String profileUrl;
+        private String field;
+        private String createdAt;
+        private String applicationDate;
+    }
 }

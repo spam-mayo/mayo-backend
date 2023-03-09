@@ -14,7 +14,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 @RequiredArgsConstructor
 @Validated
 public class AuthController {
@@ -39,14 +39,14 @@ public class AuthController {
     }
 
     //비밀번호 찾기시 랜덤 링크 전송
-    @PostMapping("/email/password")
+    @PostMapping("/password")
     public ResponseEntity findPassword(@RequestBody @Valid AuthDto.EmailDto emailDto) throws MessagingException {
         authService.sendEmailForPassword(emailDto.getEmail());
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     //랜덤 링크를 통한 비밀번호 변경
-    @PostMapping("/password")
+    @PatchMapping("/password")
     public ResponseEntity authPasswordUrl(@RequestParam @NotBlank String authCode,
                                           @RequestBody @Valid AuthDto.PasswordDto passwordDto) {
         authService.setNewPassword(authCode, passwordDto.getNewPassword());

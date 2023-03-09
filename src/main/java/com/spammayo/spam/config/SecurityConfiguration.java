@@ -2,12 +2,8 @@ package com.spammayo.spam.config;
 
 import com.spammayo.spam.security.auth.filter.JwtAuthenticationFilter;
 import com.spammayo.spam.security.auth.filter.JwtVerificationFilter;
-import com.spammayo.spam.security.auth.handler.MemberAccessDeniedHandler;
-import com.spammayo.spam.security.auth.handler.MemberAuthenticationEntryPoint;
-import com.spammayo.spam.security.auth.handler.MemberAuthenticationFailureHandler;
-import com.spammayo.spam.security.auth.handler.MemberAuthenticationSuccessHandler;
+import com.spammayo.spam.security.auth.handler.*;
 import com.spammayo.spam.security.auth.jwt.JwtTokenizer;
-import com.spammayo.spam.security.auth.handler.OAuth2MemberSuccessHandler;
 import com.spammayo.spam.security.utils.CustomAuthorityUtils;
 import com.spammayo.spam.security.utils.RedisUtils;
 import com.spammayo.spam.user.repository.UserRepository;
@@ -53,7 +49,8 @@ public class SecurityConfiguration {
                 .and()
                 .authorizeHttpRequests(auth -> auth
                         .antMatchers(HttpMethod.GET, "/**").permitAll()
-                        .antMatchers(HttpMethod.POST, "/api/users/join", "/api/auth/token/reissue", "/api/auth/email/**", "/api/auth/password/**").permitAll()
+                        .antMatchers(HttpMethod.POST, "/api/users/join").permitAll()
+                        .antMatchers(HttpMethod.PATCH, "/api/auth/password/**").permitAll()
                         .antMatchers(HttpMethod.DELETE, "/api/users").hasRole("USER")
                         .antMatchers("/h2/**").permitAll()
                         .antMatchers("/oauth2/**", "/loading/**", "/api/auth/**").permitAll()

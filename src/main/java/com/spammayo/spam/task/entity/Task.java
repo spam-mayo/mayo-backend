@@ -1,4 +1,4 @@
-package com.spammayo.spam.studytodo.entity;
+package com.spammayo.spam.task.entity;
 
 import com.spammayo.spam.study.entity.Study;
 import lombok.Getter;
@@ -11,17 +11,17 @@ import javax.persistence.*;
 @Setter
 @NoArgsConstructor
 @Entity
-public class StudyTodo {
+public class Task {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long studyTodoId;
+    private Long taskId;
 
     @Column(nullable = false)
-    private String todo;
+    private String task;
 
     @Column(nullable = false)
-    private String todoDate;
+    private String taskDate;
 
     @ManyToOne
     @JoinColumn(name = "STUDY_ID")

@@ -2,6 +2,7 @@ package com.spammayo.spam.user.mapper;
 
 import com.spammayo.spam.stack.dto.StackDto;
 import com.spammayo.spam.stack.entity.Stack;
+import com.spammayo.spam.study.entity.StudyUser;
 import com.spammayo.spam.user.dto.UserDto;
 import com.spammayo.spam.user.entity.User;
 import com.spammayo.spam.user.entity.UserStack;
@@ -66,5 +67,28 @@ public interface UserMapper {
         return responseDto;
     }
 
-    List<UserDto.ResponseDto> usersToResponseDto(List<User> user);
+    List<UserDto.ListResponseDto> usersToResponseDto(List<User> user);
+
+    default List<UserDto.ListResponseDto> userToListResponseDto(List<User> users, long studyId) {
+        if ( users == null ) {
+            return null;
+        }
+
+        List<UserDto.ListResponseDto> list = new ArrayList<>();
+
+        for (User user : users) {
+            UserDto.ListResponseDto listResponseDto = new UserDto.ListResponseDto();
+            listResponseDto.setUserId(user.getUserId());
+            listResponseDto.setUserName(user.getUserName());
+            listResponseDto.setProfileUrl(user.getProfileUrl());
+            Optional.ofNullable(user.getField())
+                            .ifPresent(listResponseDto::setField);
+            listResponseDto.setCreatedAt(user.getCreatedAt().toLocalDate().toString());
+            StudyUser findStudyUser = user.getStudyUsers().stream().filter(studyUser -> studyUser.getStudy().getStudyId() == studyId).findAny().orElseThrow();
+            listResponseDto.setApplicationDate(findStudyUser.getCreatedAt().toLocalDate().toString());
+            list.add(listResponseDto);
+        }
+
+        return list;
+    }
 }

@@ -18,7 +18,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/user")
+@RequestMapping("/api/users")
 @Validated
 public class UserController {
 
@@ -52,13 +52,13 @@ public class UserController {
         return new ResponseEntity<>(mapper.userToResponseDto(user), HttpStatus.OK);
     }
 
-    @GetMapping("/all")
+    @GetMapping
     public ResponseEntity getAllUser() {
         List<User> users = userService.getAllUser();
         return new ResponseEntity<>(mapper.usersToResponseDto(users), HttpStatus.OK);
     }
 
-    @PatchMapping("/{user-id}/profile")
+    @PatchMapping("/{user-id}/image")
     public ResponseEntity updateProfileImage(@PathVariable("user-id") @Positive long userId,
                                              MultipartFile image) throws IOException {
         User user = userService.updateProfileImage(image, userId);

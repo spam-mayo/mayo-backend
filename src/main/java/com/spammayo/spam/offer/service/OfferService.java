@@ -26,6 +26,7 @@ public class OfferService {
             throw new BusinessLogicException(ExceptionCode.OFFER_EXISTS);
         }
         studyService.accessResource(study);
+        study.setStudyStatus(Study.StudyStatus.RECRUITING);
         offer.setStudy(study);
         return offerRepository.save(offer);
     }

@@ -14,7 +14,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 
 @RestController
-@RequestMapping("/offer")
+@RequestMapping("/api/offer")
 @RequiredArgsConstructor
 @Validated
 public class OfferController {

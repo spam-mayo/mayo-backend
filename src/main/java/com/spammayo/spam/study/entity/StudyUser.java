@@ -1,5 +1,6 @@
 package com.spammayo.spam.study.entity;
 
+import com.spammayo.spam.audit.Auditable;
 import com.spammayo.spam.user.entity.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,7 +12,7 @@ import javax.persistence.*;
 @Setter
 @NoArgsConstructor
 @Entity
-public class StudyUser {
+public class StudyUser extends Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

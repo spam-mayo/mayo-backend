@@ -50,8 +50,7 @@ public class UserService {
     }
 
     public User updateUser(User user) {
-        //TODO : 추후 주석 제거예
-//        checkJwtAndUser(user.getUserId());
+        checkJwtAndUser(user.getUserId());
         User findUser = existUser(user.getUserId());
 
         Optional.ofNullable(user.getUserName())
@@ -70,8 +69,7 @@ public class UserService {
     }
 
     public void deleteUser(long userId) {
-        //TODO: 추후 주석 제거예
-//        checkJwtAndUser(userId);
+        checkJwtAndUser(userId);
         userRepository.delete(existUser(userId));
     }
 

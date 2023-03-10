@@ -5,6 +5,7 @@ import com.spammayo.spam.stack.entity.Stack;
 import com.spammayo.spam.study.dto.StudyDto;
 import com.spammayo.spam.study.entity.Study;
 import com.spammayo.spam.study.entity.StudyStack;
+import com.spammayo.spam.study.entity.StudyUser;
 import com.spammayo.spam.user.entity.User;
 import org.mapstruct.Mapper;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -122,17 +123,12 @@ public interface StudyMapper {
         responseDto.setPeriod( study.getPeriod() );
         responseDto.setStudyStatus( study.getStudyStatus() );
         responseDto.setOnline( study.isOnline() );
-        study.getStudyUsers().forEach(user -> {
-            if (user.isAdmin()) {
-                User admin = user.getUser();
-                responseDto.setUserId(admin.getUserId());
-                responseDto.setUserName(admin.getUserName());
-                responseDto.setEmail(admin.getEmail());
-                responseDto.setUserProfileUrl(admin.getProfileUrl());
-                Optional.ofNullable(admin.getField())
-                        .ifPresent(responseDto::setField);
-            }
-        });
+
+        StudyUser studyUser = study.getStudyUsers().stream().filter(StudyUser::isAdmin).findFirst().orElseThrow();
+        User admin = studyUser.getUser();
+        StudyDto.OwnerDto ownerDto = new StudyDto.OwnerDto(admin.getUserId(), admin.getUserName(), admin.getEmail(), admin.getField(), admin.getProfileUrl());
+        responseDto.setOwner(ownerDto);
+
         Optional.ofNullable(study.getStudyStacks())
                 .ifPresent(ss -> ss.forEach(userStack -> {
                     Stack stack = userStack.getStack();
@@ -140,8 +136,7 @@ public interface StudyMapper {
                 }));
         responseDto.setStack(stackList);
 
-        String email = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
-        boolean check = study.getLikes().stream().anyMatch(like -> like.getUser().getEmail().equals(email));
+        boolean check = isCheck(study);
         responseDto.setCheckLikes(check);
 
         return responseDto;
@@ -163,14 +158,15 @@ public interface StudyMapper {
             listResponseDto.setEndDate( study.getEndDate() );
             listResponseDto.setStudyStatus( study.getStudyStatus() );
             listResponseDto.setOnline( study.isOnline() );
-            study.getStudyUsers().forEach(user -> {
-                if (user.isAdmin()) {
-                    User admin = user.getUser();
-                    listResponseDto.setUserName(admin.getUserName());
-                    listResponseDto.setUserId(admin.getUserId());
-                    listResponseDto.setUserProfileUrl(admin.getProfileUrl());
-                }
-            });
+            boolean check = isCheck(study);
+            listResponseDto.setCheckLikes(check);
+
+            //작성자
+            StudyUser studyUser = study.getStudyUsers().stream().filter(StudyUser::isAdmin).findFirst().orElseThrow();
+            User admin = studyUser.getUser();
+            StudyDto.SimpleOwnerDto ownerDto = new StudyDto.SimpleOwnerDto(admin.getUserId(), admin.getUserName(), admin.getProfileUrl());
+            listResponseDto.setOwner(ownerDto);
+
             study.getStudyStacks().forEach(ss -> {
                 Stack stack = ss.getStack();
                 StackDto stackDto = new StackDto(stack.getStackId(), stack.getStackName());
@@ -184,5 +180,48 @@ public interface StudyMapper {
     }
 
     Study noticeDtoToStudy(StudyDto.NoticeDto noticeDto);
+
+    StudyDto.NoticeDto studyToNoticeDto(Study study);
+
+    default List<StudyDto.MyPageResponseDto> studiesToMyPageResponseDto(List<Study> studies) {
+        if ( studies == null ) {
+            return null;
+        }
+
+        List<StudyDto.MyPageResponseDto> list = new ArrayList<>(studies.size());
+        for ( Study study : studies ) {
+            List<StackDto> stackList = new ArrayList<>();
+            StudyDto.MyPageResponseDto myPageResponseDto = new StudyDto.MyPageResponseDto();
+
+            myPageResponseDto.setStudyId( study.getStudyId() );
+            myPageResponseDto.setTitle( study.getTitle() );
+            myPageResponseDto.setStartDate( study.getStartDate() );
+            myPageResponseDto.setEndDate( study.getEndDate() );
+            myPageResponseDto.setStudyStatus( study.getStudyStatus() );
+
+            String email = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+            StudyUser findStudyUser = study.getStudyUsers().stream().filter(studyUser -> studyUser.getUser().getEmail().equals(email)).findFirst().orElseThrow();
+
+            if (findStudyUser.isAdmin()) {
+                myPageResponseDto.setAdmin(true);
+            }
+            myPageResponseDto.setApprovalStatus(findStudyUser.getApprovalStatus());
+
+            study.getStudyStacks().forEach(ss -> {
+                Stack stack = ss.getStack();
+                StackDto stackDto = new StackDto(stack.getStackId(), stack.getStackName());
+                stackList.add(stackDto);
+            });
+            myPageResponseDto.setStack(stackList);
+            list.add(myPageResponseDto);
+        }
+
+        return list;
+    }
+
+    private static boolean isCheck(Study study) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+        return study.getLikes().stream().anyMatch(like -> like.getUser().getEmail().equals(email));
+    }
 
 }

@@ -2,6 +2,8 @@ package com.spammayo.spam.study.dto;
 
 import com.spammayo.spam.stack.dto.StackDto;
 import com.spammayo.spam.study.entity.Study;
+import com.spammayo.spam.study.entity.StudyUser;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -81,7 +83,7 @@ public class StudyDto {
     @NoArgsConstructor
     @Getter
     @Setter
-public static class ResponseDto {
+    public static class ResponseDto {
         private Long studyId;
         private String studyName;
         private String title;
@@ -98,12 +100,7 @@ public static class ResponseDto {
         private boolean checkLikes;
         private List<StackDto> stack;
 
-        //admin
-        private long userId;
-        private String userName;
-        private String email;
-        private String field;
-        private String userProfileUrl;
+        private OwnerDto owner;
 
         public String getStudyStatus() {
             return studyStatus.getStatus();
@@ -120,11 +117,9 @@ public static class ResponseDto {
         private Study.StudyStatus studyStatus;
         private boolean online;
         private List<StackDto> stack;
+        private boolean checkLikes;
 
-        //admin
-        private long userId;
-        private String userName;
-        private String userProfileUrl;
+        private SimpleOwnerDto owner;
 
         public String getStudyStatus() {
             return studyStatus.getStatus();
@@ -132,9 +127,55 @@ public static class ResponseDto {
     }
 
     @NoArgsConstructor
+    @AllArgsConstructor
+    @Getter @Setter
+    public static class SimpleOwnerDto {
+        private long userId;
+        private String userName;
+        private String userProfileUrl;
+    }
+
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Getter @Setter
+    public static class OwnerDto {
+        private long userId;
+        private String userName;
+        private String email;
+        private String field;
+        private String userProfileUrl;
+    }
+
+    @NoArgsConstructor
     @Getter @Setter
     public static class NoticeDto {
         private long studyId;
-        private String notice;
+        @NotBlank
+        private String noticeTitle;
+        @NotBlank
+        private String noticeContent;
+    }
+
+    @NoArgsConstructor
+    @Getter @Setter
+    public static class MyPageResponseDto {
+        private Long studyId;
+        private String title;
+        private String startDate;
+        private String endDate;
+        private Study.StudyStatus studyStatus;
+        private List<StackDto> stack;
+        private StudyUser.ApprovalStatus approvalStatus;
+
+        //admin
+        private boolean isAdmin;
+
+        public String getStudyStatus() {
+            return studyStatus.getStatus();
+        }
+
+        public String getApprovalStatus() {
+            return approvalStatus.getStatus();
+        }
     }
 }

@@ -2,12 +2,8 @@ package com.spammayo.spam.config;
 
 import com.spammayo.spam.security.auth.filter.JwtAuthenticationFilter;
 import com.spammayo.spam.security.auth.filter.JwtVerificationFilter;
-import com.spammayo.spam.security.auth.handler.MemberAccessDeniedHandler;
-import com.spammayo.spam.security.auth.handler.MemberAuthenticationEntryPoint;
-import com.spammayo.spam.security.auth.handler.MemberAuthenticationFailureHandler;
-import com.spammayo.spam.security.auth.handler.MemberAuthenticationSuccessHandler;
+import com.spammayo.spam.security.auth.handler.*;
 import com.spammayo.spam.security.auth.jwt.JwtTokenizer;
-import com.spammayo.spam.security.auth.handler.OAuth2MemberSuccessHandler;
 import com.spammayo.spam.security.utils.CustomAuthorityUtils;
 import com.spammayo.spam.security.utils.RedisUtils;
 import com.spammayo.spam.user.repository.UserRepository;
@@ -52,20 +48,18 @@ public class SecurityConfiguration {
                 .apply(new CustomFilterConfigurer())
                 .and()
                 .authorizeHttpRequests(auth -> auth
-                        .antMatchers("/**").permitAll() //TODO : 추후 삭제예
                         .antMatchers(HttpMethod.GET, "/**").permitAll()
-                        .antMatchers(HttpMethod.POST, "/user/join", "/token/reissue", "/email/**", "/find/password").permitAll()
-                        .antMatchers(HttpMethod.DELETE, "/user").hasRole("USER")
+                        .antMatchers(HttpMethod.POST, "/api/users/join").permitAll()
+                        .antMatchers(HttpMethod.PATCH, "/api/auth/password/**").permitAll()
+                        .antMatchers(HttpMethod.DELETE, "/api/users").hasRole("USER")
                         .antMatchers("/h2/**").permitAll()
-                        .antMatchers("/login/**", "/oauth2/**", "/loading/**", "/auth/**").permitAll()
+                        .antMatchers("/oauth2/**", "/loading/**", "/api/auth/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
                         .successHandler(new OAuth2MemberSuccessHandler(jwtTokenizer, userRepository, redisUtils))
                 );
-
         return http.build();
-
     }
 
     @Bean
@@ -79,7 +73,7 @@ public class SecurityConfiguration {
             AuthenticationManager authenticationManager = builder.getSharedObject(AuthenticationManager.class);
 
             JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(authenticationManager, jwtTokenizer, redisUtils);
-            jwtAuthenticationFilter.setFilterProcessesUrl("/login");
+            jwtAuthenticationFilter.setFilterProcessesUrl("/api/auth/login");
             jwtAuthenticationFilter.setAuthenticationSuccessHandler(new MemberAuthenticationSuccessHandler());
             jwtAuthenticationFilter.setAuthenticationFailureHandler(new MemberAuthenticationFailureHandler());
 

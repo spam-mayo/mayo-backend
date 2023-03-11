@@ -33,6 +33,7 @@ public enum ExceptionCode {
     STUDY_NOT_FOUND(404, "Study Not Found"),
     STUDY_CHECK_EXISTS(409, "Study Check exists"),
     STUDY_EXISTS(409, "Study exists"),
+    STUDY_REQUEST_EXISTS(409, "Study Request exists"),
 
     //offer
     OFFER_NOT_PATCHED(403, "Offer not patched"),
@@ -49,7 +50,13 @@ public enum ExceptionCode {
     STACK_NOT_PATCHED(403, "Stack not patched"),
     STACK_NOT_FOUND(404, "Stack Not Found"),
     STACK_CHECK_EXISTS(409, "Stack Check exists"),
-    STACK_EXISTS(409, "Stack exists");
+    STACK_EXISTS(409, "Stack exists"),
+
+    //study_Task
+    TASK_NOT_PATCHED(403, "Task not patched"),
+    TASK_NOT_FOUND(404, "Task Not Found"),
+    TASK_CHECK_EXISTS(409, "Task Check exists"),
+    TASK_EXISTS(409, "Task exists");
 
 
     @Getter

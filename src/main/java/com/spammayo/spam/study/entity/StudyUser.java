@@ -1,5 +1,6 @@
 package com.spammayo.spam.study.entity;
 
+import com.spammayo.spam.audit.Auditable;
 import com.spammayo.spam.user.entity.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,7 +12,7 @@ import javax.persistence.*;
 @Setter
 @NoArgsConstructor
 @Entity
-public class StudyUser {
+public class StudyUser extends Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,7 +20,8 @@ public class StudyUser {
 
     private boolean isAdmin;
 
-    private boolean approval;
+    @Enumerated(EnumType.STRING)
+    private ApprovalStatus approvalStatus;
 
     @ManyToOne
     @JoinColumn(name = "STUDY_ID")
@@ -29,4 +31,16 @@ public class StudyUser {
     @JoinColumn(name = "USER_ID")
     private User user;
 
+    public enum ApprovalStatus {
+        APPROVAL("승인"),
+        REJECT("거절"),
+        WAITING("대기중");
+
+        @Getter
+        private String status;
+
+        ApprovalStatus(String status) {
+            this.status = status;
+        }
+    }
 }

@@ -11,13 +11,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/stacks")
+@RequestMapping("/api/stacks")
 @RequiredArgsConstructor
 public class StackController {
     private final StackService stackService;
     private final StackMapper mapper;
 
-    @GetMapping("/all")
+    @GetMapping
     public ResponseEntity getStacks() {
         List<Stack> stacks = stackService.getAllStacks();
         return new ResponseEntity<>(mapper.stacksToResponseDto(stacks), HttpStatus.OK);

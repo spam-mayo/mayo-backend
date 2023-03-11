@@ -1,7 +1,5 @@
 package com.spammayo.spam.security.auth.controller;
 
-import com.spammayo.spam.exception.BusinessLogicException;
-import com.spammayo.spam.exception.ExceptionCode;
 import com.spammayo.spam.security.auth.dto.AuthDto;
 import com.spammayo.spam.security.auth.service.AuthService;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +14,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 @RequiredArgsConstructor
 @Validated
 public class AuthController {
@@ -41,22 +39,17 @@ public class AuthController {
     }
 
     //비밀번호 찾기시 랜덤 링크 전송
-    @PostMapping("/email/password")
+    @PostMapping("/password")
     public ResponseEntity findPassword(@RequestBody @Valid AuthDto.EmailDto emailDto) throws MessagingException {
         authService.sendEmailForPassword(emailDto.getEmail());
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     //랜덤 링크를 통한 비밀번호 변경
-    @PostMapping("/password")
-    public ResponseEntity authPasswordUrl(@RequestParam @NotBlank String randomCode,
+    @PatchMapping("/password")
+    public ResponseEntity authPasswordUrl(@RequestParam @NotBlank String authCode,
                                           @RequestBody @Valid AuthDto.PasswordDto passwordDto) {
-        String firstPassword = passwordDto.getFirstPassword();
-        String secondPassword = passwordDto.getSecondPassword();
-        if (!firstPassword.equals(secondPassword)) {
-            throw new BusinessLogicException(ExceptionCode.INVALID_VALUES);
-        }
-        authService.setNewPassword(randomCode, firstPassword);
+        authService.setNewPassword(authCode, passwordDto.getNewPassword());
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

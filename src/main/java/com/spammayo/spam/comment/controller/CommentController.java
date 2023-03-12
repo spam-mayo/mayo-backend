@@ -5,7 +5,6 @@ import com.spammayo.spam.comment.entity.Comment;
 import com.spammayo.spam.comment.mapper.CommentMapper;
 import com.spammayo.spam.comment.service.CommentService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -13,11 +12,10 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
-import java.util.List;
 
 @Validated
 @RestController
-@RequestMapping("/comment")
+@RequestMapping("/api/comment")
 @RequiredArgsConstructor
 public class CommentController {
 
@@ -31,12 +29,12 @@ public class CommentController {
         Comment comment = commentService.createComment(
                 commentMapper.commentPostDtoToComment(requestBody), offerId);
 
-        return new ResponseEntity<>(commentMapper.commentToCommentResponseDto(comment), HttpStatus.OK);
+        return new ResponseEntity<>(commentMapper.commentToCommentResponseDto(comment), HttpStatus.CREATED);
     }
 
     @PatchMapping("/{commentId}")
     public ResponseEntity patchComment(@PathVariable("commentId") @Positive Long commentId,
-                                        @RequestBody @Valid CommentDto.PatchDto requestBody) {
+                                       @RequestBody @Valid CommentDto.PatchDto requestBody) {
 
         Comment comment = commentService.updateComment(
                 commentMapper.commentPatchDtoToComment(requestBody));
@@ -47,8 +45,7 @@ public class CommentController {
     }
 
     @GetMapping("/{commentId}")
-    public ResponseEntity getComment(@PathVariable("commentId") @Positive Long commentId)
-    {
+    public ResponseEntity getComment(@PathVariable("commentId") @Positive Long commentId) {
         Comment comment = commentService.findComment(commentId);
 
         return new ResponseEntity<>(commentMapper.commentToCommentResponseDto(comment), HttpStatus.OK);

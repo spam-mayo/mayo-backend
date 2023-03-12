@@ -9,7 +9,6 @@ public class CommentDto {
     @Getter @Setter
     @NoArgsConstructor
     public static class PostDto {
-        @NotBlank
         private Long offerId;
         @NotBlank
         private String comment;
@@ -19,11 +18,8 @@ public class CommentDto {
     @Getter @Setter
     @NoArgsConstructor
     public static class PatchDto {
-        @NotBlank
         private Long commentId;
-        @NotBlank
         private Long offerId;
-        @NotBlank
         private Long userId;
         @NotBlank
         private String comment;

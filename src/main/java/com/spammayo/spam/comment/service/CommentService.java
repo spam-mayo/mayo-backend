@@ -7,12 +7,8 @@ import com.spammayo.spam.exception.ExceptionCode;
 import com.spammayo.spam.offer.entity.Offer;
 import com.spammayo.spam.offer.service.OfferService;
 import com.spammayo.spam.user.entity.User;
-import com.spammayo.spam.user.repository.UserRepository;
 import com.spammayo.spam.user.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -74,6 +70,8 @@ public class CommentService {
         if (!findComment.getUser().getEmail().equals(userService.getLoginUser().getEmail())) {
             throw new BusinessLogicException(ExceptionCode.ACCESS_FORBIDDEN);
         }
+
+        commentRepository.delete(findComment);
     }
     // 댓글 존재 여부
     private Comment verifiedComment(Long commentId) {

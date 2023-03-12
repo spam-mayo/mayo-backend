@@ -47,6 +47,7 @@ public interface CommentMapper {
                 .userName(user.getUserName())
                 .profileUrl(user.getProfileUrl())
                 .comment(comment.getComment())
+                .secret(comment.getSecret())
                 .createdAt(comment.getCreatedAt())
                 .modifiedAt(comment.getModifiedAt())
                 .build();

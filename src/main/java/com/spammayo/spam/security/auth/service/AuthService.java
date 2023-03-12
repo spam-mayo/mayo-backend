@@ -65,7 +65,7 @@ public class AuthService {
         } catch (SignatureException | MalformedJwtException | DecodingException e) {
             throw new BusinessLogicException(ExceptionCode.INVALID_VALUES);
         } catch (ExpiredJwtException e) {
-            throw new BusinessLogicException(ExceptionCode.UNAUTHORIZED);
+            throw new BusinessLogicException(ExceptionCode.EXPIRED_JWT_TOKEN);
         }
 
         Jws<Claims> claims = jwtTokenizer.getClaims(refreshToken, encodeBase64SecretKey);
@@ -160,7 +160,9 @@ public class AuthService {
 
     private String setPasswordContext(String authCode) {
         Context context = new Context();
-        context.setVariable("link", "http://ec2-3-38-166-165.ap-northeast-2.compute.amazonaws.com:8080/auth/password?authCode=" + authCode);
+        //TODO : 추후 url 변경 예정
+//        https://mayo-frontend-47zd.vercel.app/auth/password?authCode=
+        context.setVariable("link", "http://localhost:5173/auth/password?authCode=" + authCode);
         return templateEngine.process("NewPassword", context);
     }
 

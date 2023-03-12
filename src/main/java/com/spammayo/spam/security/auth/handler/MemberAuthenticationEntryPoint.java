@@ -1,5 +1,7 @@
 package com.spammayo.spam.security.auth.handler;
 
+import com.spammayo.spam.exception.BusinessLogicException;
+import com.spammayo.spam.exception.ExceptionCode;
 import com.spammayo.spam.security.utils.ErrorResponder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -18,7 +20,11 @@ public class MemberAuthenticationEntryPoint implements AuthenticationEntryPoint 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
         Exception exception = (Exception) request.getAttribute("exception");
-        ErrorResponder.sendErrorResponse(response, HttpStatus.UNAUTHORIZED);
+        if (exception.getMessage().contains("JWT expired at")) {
+            ErrorResponder.sendCustomErrorResponse(response, new BusinessLogicException(ExceptionCode.EXPIRED_JWT_TOKEN));
+        } else {
+            ErrorResponder.sendErrorResponse(response, HttpStatus.UNAUTHORIZED);
+        }
 
         logExceptionMessage(authException, exception);
     }

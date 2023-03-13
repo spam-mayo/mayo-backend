@@ -1,5 +1,6 @@
 package com.spammayo.spam.studycomment.controller;
 
+import com.spammayo.spam.offercomment.entity.OfferComment;
 import com.spammayo.spam.studycomment.dto.StudyCommentDto;
 import com.spammayo.spam.studycomment.entity.StudyComment;
 import com.spammayo.spam.studycomment.mapper.StudyCommentMapper;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
+import java.util.List;
 
 @Validated
 @RestController
@@ -53,6 +55,14 @@ public class StudyCommentController {
         StudyComment studyComment = studyCommentService.findComment(studyCommentId);
 
         return new ResponseEntity<>(studyCommentMapper.studyCommentToStudyCommentResponseDto(studyComment), HttpStatus.OK);
+    }
+
+    @GetMapping
+    public ResponseEntity getComments() {
+
+        List<StudyComment> studyComments = studyCommentService.findComments();
+
+        return new ResponseEntity<>(studyCommentMapper.studyCommentsToStudyCommentResponseDto(studyComments), HttpStatus.OK);
     }
 
     @DeleteMapping("/{studyCommentId}")

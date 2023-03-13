@@ -4,6 +4,7 @@ import com.spammayo.spam.offercomment.dto.OfferCommentDto;
 import com.spammayo.spam.offercomment.entity.OfferComment;
 import com.spammayo.spam.offercomment.mapper.OfferCommentMapper;
 import com.spammayo.spam.offercomment.service.OfferCommentService;
+import com.spammayo.spam.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
+import java.util.List;
 
 @Validated
 @RestController
@@ -54,18 +56,13 @@ public class OfferCommentController {
         return new ResponseEntity<>(offerCommentMapper.commentToCommentResponseDto(offerComment), HttpStatus.OK);
     }
 
-/*
     @GetMapping
-    public ResponseEntity getComments(@Positive @RequestParam("page") int page,
-                                      @Positive @RequestParam("size") int size) {
-        List<Comment> comments = pageComments.getContent();
+    public ResponseEntity getComments() {
 
-        return new ResponseEntity<>(
-                new MultiResponseDto<>(commentMapper.commentsToCommentResponseDtos(comments),
-                        pageComments),
-                HttpStatus.OK);
+        List<OfferComment> offerComments = offerCommentService.findComments();
+
+        return new ResponseEntity<>(offerCommentMapper.commentsToCommentResponseDto(offerComments), HttpStatus.OK);
     }
-*/
 
     @DeleteMapping("/{offerCommentId}")
     public ResponseEntity deleteComment(@PathVariable("offerCommentId") @Positive Long offerCommentId) {

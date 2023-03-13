@@ -1,11 +1,11 @@
-package com.spammayo.spam.comment.service;
+package com.spammayo.spam.offercomment.service;
 
-import com.spammayo.spam.comment.entity.Comment;
-import com.spammayo.spam.comment.repository.CommentRepository;
 import com.spammayo.spam.exception.BusinessLogicException;
 import com.spammayo.spam.exception.ExceptionCode;
 import com.spammayo.spam.offer.entity.Offer;
 import com.spammayo.spam.offer.service.OfferService;
+import com.spammayo.spam.offercomment.entity.OfferComment;
+import com.spammayo.spam.offercomment.repository.OfferCommentRepository;
 import com.spammayo.spam.user.entity.User;
 import com.spammayo.spam.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -18,13 +18,13 @@ import java.util.Optional;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class CommentService {
-    private final CommentRepository commentRepository;
+public class OfferCommentService {
+    private final OfferCommentRepository offerCommentRepository;
     private final UserService userService;
     private final OfferService offerService;
 
-    public Comment createComment(Comment comment,
-                                 Long offerId) {
+    public OfferComment createComment(OfferComment comment,
+                                      Long offerId) {
 
         Offer offer = offerService.findOffer(offerId);
         User user = userService.getLoginUser();
@@ -33,12 +33,13 @@ public class CommentService {
         comment.setUser(user);
         comment.setOffer(offer);
 
-        return commentRepository.save(comment);
+        return offerCommentRepository.save(comment);
     }
 
-    public Comment updateComment(Comment comment) {
+    public OfferComment updateComment(OfferComment comment,
+                                      Long offerCommentId) {
 
-        Comment findComment = verifiedComment(comment.getCommentId());
+        OfferComment findComment = verifiedComment(offerCommentId);
 
         // TODO : 스터디 방장 권한 추가
         if (!findComment.getUser().getEmail().equals(userService.getLoginUser().getEmail())) {
@@ -51,32 +52,32 @@ public class CommentService {
         Optional.ofNullable(comment.getSecret())
                 .ifPresent(findComment::setSecret);
 
-        return commentRepository.save(findComment);
+        return offerCommentRepository.save(findComment);
     }
 
-    public Comment findComment(Long commentId) {
-        return verifiedComment(commentId);
+    public OfferComment findComment(Long offerCommentId) {
+        return verifiedComment(offerCommentId);
     }
 
-    public List<Comment> findComments() {
-        return commentRepository.findAll();
+    public List<OfferComment> findComments() {
+        return offerCommentRepository.findAll();
     }
 
-    public void deleteComment(Long commentId) {
+    public void deleteComment(Long offerCommentId) {
 
-        Comment findComment = verifiedComment(commentId);
+        OfferComment findComment = verifiedComment(offerCommentId);
 
         // TODO : 스터디 방장 권한 추가
         if (!findComment.getUser().getEmail().equals(userService.getLoginUser().getEmail())) {
             throw new BusinessLogicException(ExceptionCode.ACCESS_FORBIDDEN);
         }
 
-        commentRepository.delete(findComment);
+        offerCommentRepository.delete(findComment);
     }
     // 댓글 존재 여부
-    private Comment verifiedComment(Long commentId) {
+    private OfferComment verifiedComment(Long offerCommentId) {
 
-        return commentRepository.findById(commentId)
+        return offerCommentRepository.findById(offerCommentId)
                 .orElseThrow(() -> new BusinessLogicException(ExceptionCode.COMMENT_NOT_FOUND));
     }
 }

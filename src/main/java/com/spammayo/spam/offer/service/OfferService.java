@@ -5,6 +5,7 @@ import com.spammayo.spam.exception.ExceptionCode;
 import com.spammayo.spam.offer.entity.Offer;
 import com.spammayo.spam.offer.repository.OfferRepository;
 import com.spammayo.spam.study.entity.Study;
+import com.spammayo.spam.study.repository.StudyRepository;
 import com.spammayo.spam.study.service.StudyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,21 +20,37 @@ public class OfferService {
 
     private final OfferRepository offerRepository;
     private final StudyService studyService;
+    private final StudyRepository studyRepository;
 
     public Offer createOffer(Offer offer, long studyId) {
         Study study = studyService.findStudy(studyId);
+        Study.StudyStatus studyStatus = study.getStudyStatus();
+
+        //구인글은 1개만 허용
         if (study.getOffer() != null) {
             throw new BusinessLogicException(ExceptionCode.OFFER_EXISTS);
         }
         studyService.accessResource(study);
-        study.setStudyStatus(Study.StudyStatus.RECRUITING);
+
+        //종료, 폐쇄된 스터디는 구인글 작성 불가
+        if (studyStatus == Study.StudyStatus.CLOSED || studyStatus == Study.StudyStatus.END) {
+            throw new BusinessLogicException(ExceptionCode.INVALID_STUDY_STATUS);
+        }
+
+        //상태 - 진행중이 아니면 모집중으로 설정
+        if (studyStatus != Study.StudyStatus.ONGOING) {
+            study.setStudyStatus(Study.StudyStatus.RECRUITING);
+        }
+
         offer.setStudy(study);
         return offerRepository.save(offer);
     }
 
     public Offer updateOffer(Offer offer) {
         Offer findOffer = existOffer(offer.getOfferId());
-        studyService.accessResource(findOffer.getStudy());
+        Study findStudy = findOffer.getStudy();
+        studyService.accessResource(findStudy);
+        studyService.checkRecruitingAndOngoingStudy(findStudy);
 
         Optional.ofNullable(offer.getOfferIntro())
                 .ifPresent(findOffer::setOfferIntro);
@@ -50,7 +67,12 @@ public class OfferService {
 
     public void deleteOffer(long offerId) {
         Offer offer = existOffer(offerId);
-        studyService.accessResource(offer.getStudy());
+        Study findStudy = offer.getStudy();
+        studyService.checkRecruitingAndOngoingStudy(findStudy);
+
+        studyService.accessResource(findStudy);
+        findStudy.setStudyStatus(Study.StudyStatus.BEFORE_RECRUITMENT);
+        studyRepository.save(findStudy);
         offerRepository.delete(offer);
     }
 

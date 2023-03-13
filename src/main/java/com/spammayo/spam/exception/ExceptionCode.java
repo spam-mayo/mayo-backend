@@ -11,6 +11,7 @@ public enum ExceptionCode {
     INTERNAL_SERVER_ERROR(500, "Internal Server Error"),
     NOT_IMPLEMENTATION(501, "Not Implementation"),
     INVALID_VALUES(400, "Invalid Values"),
+    INVALID_DATE(400, "Invalid Date"),
 
     //auth
     INVALID_EMAIL_AUTH_NUMBER(400, "Invalid email authNumber"),
@@ -34,6 +35,9 @@ public enum ExceptionCode {
     STUDY_CHECK_EXISTS(409, "Study Check exists"),
     STUDY_EXISTS(409, "Study exists"),
     STUDY_REQUEST_EXISTS(409, "Study Request exists"),
+    STUDY_NOT_RECRUITING(403, "Study status not recruiting"),
+    INVALID_STUDY_STATUS(403, "Invalid Study Status"),
+    STUDY_MEMBER_EXISTS(409, "Study Member exists"),
 
     //offer
     OFFER_NOT_PATCHED(403, "Offer not patched"),

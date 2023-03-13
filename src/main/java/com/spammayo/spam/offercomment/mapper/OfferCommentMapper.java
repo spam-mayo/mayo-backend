@@ -1,21 +1,21 @@
-package com.spammayo.spam.comment.mapper;
+package com.spammayo.spam.offercomment.mapper;
 
-import com.spammayo.spam.comment.dto.CommentDto;
-import com.spammayo.spam.comment.entity.Comment;
 import com.spammayo.spam.offer.entity.Offer;
+import com.spammayo.spam.offercomment.dto.OfferCommentDto;
+import com.spammayo.spam.offercomment.entity.OfferComment;
 import com.spammayo.spam.user.entity.User;
 import org.mapstruct.Mapper;
 
 import java.util.List;
 
 @Mapper(componentModel = "spring")
-public interface CommentMapper {
+public interface OfferCommentMapper {
 
-    default Comment commentPostDtoToComment(CommentDto.PostDto requestBody) {
+    default OfferComment commentPostDtoToComment(OfferCommentDto.PostDto requestBody) {
         Offer offer = new Offer();
         offer.setOfferId(requestBody.getOfferId());
 
-        Comment comment = new Comment();
+        OfferComment comment = new OfferComment();
         comment.setOffer(offer);
         comment.setComment(requestBody.getComment());
         comment.setSecret(requestBody.getSecret());
@@ -23,11 +23,11 @@ public interface CommentMapper {
         return comment;
     }
 
-    default Comment commentPatchDtoToComment(CommentDto.PatchDto requestBody) {
+    default OfferComment commentPatchDtoToComment(OfferCommentDto.PatchDto requestBody) {
         Offer offer = new Offer();
         offer.setOfferId(requestBody.getOfferId());
 
-        Comment comment = new Comment();
+        OfferComment comment = new OfferComment();
         comment.setOffer(offer);
         comment.setComment(requestBody.getComment());
         comment.setSecret(requestBody.getSecret());
@@ -35,13 +35,13 @@ public interface CommentMapper {
         return comment;
     }
 
-    default CommentDto.ResponseDto commentToCommentResponseDto(Comment comment) {
+    default OfferCommentDto.ResponseDto commentToCommentResponseDto(OfferComment comment) {
 
         User user = comment.getUser();
         Offer offer = comment.getOffer();
 
-        return CommentDto.ResponseDto.builder()
-                .commentId(comment.getCommentId())
+        return OfferCommentDto.ResponseDto.builder()
+                .offerCommentId(comment.getOfferCommentId())
                 .offerId(offer.getOfferId())
                 .userId(user.getUserId())
                 .userName(user.getUserName())
@@ -53,5 +53,5 @@ public interface CommentMapper {
                 .build();
     }
 
-    List<CommentDto.ResponseDto> commentsToCommentResponseDto(List<Comment> comments);
+    List<OfferCommentDto.ResponseDto> commentsToCommentResponseDto(List<OfferComment> comments);
 }

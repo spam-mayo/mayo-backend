@@ -1,4 +1,4 @@
-package com.spammayo.spam.comment.entity;
+package com.spammayo.spam.offercomment.entity;
 
 import com.spammayo.spam.audit.Auditable;
 import com.spammayo.spam.offer.entity.Offer;
@@ -13,15 +13,15 @@ import javax.persistence.*;
 @Setter
 @Entity
 @NoArgsConstructor
-public class Comment extends Auditable {
+public class OfferComment extends Auditable {
     @Id
     @GeneratedValue(strategy =  GenerationType.IDENTITY)
-    private Long commentId;
+    private Long offerCommentId;
 
     @Column(nullable = false)
     private String comment;
 
-    @Column(nullable = false)
+    @Column
     private Boolean secret;
 
 //    @OneToMany(mappedBy = "reply", cascade = { CascadeType.ALL })

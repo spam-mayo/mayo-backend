@@ -1,11 +1,11 @@
-package com.spammayo.spam.comment.dto;
+package com.spammayo.spam.offercomment.dto;
 
 import lombok.*;
 
 import javax.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 
-public class CommentDto {
+public class OfferCommentDto {
     @Getter @Setter
     @NoArgsConstructor
     public static class PostDto {
@@ -18,7 +18,7 @@ public class CommentDto {
     @Getter @Setter
     @NoArgsConstructor
     public static class PatchDto {
-        private Long commentId;
+        private Long offerCommentId;
         private Long offerId;
         private Long userId;
         @NotBlank
@@ -30,7 +30,7 @@ public class CommentDto {
     @Builder
     @AllArgsConstructor
     public static class ResponseDto {
-        private Long commentId;
+        private Long offerCommentId;
         private Long userId;
         private Long offerId;
         private String userName;

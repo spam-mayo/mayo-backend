@@ -1,7 +1,7 @@
 package com.spammayo.spam.offer.entity;
 
 import com.spammayo.spam.audit.Auditable;
-import com.spammayo.spam.comment.entity.Comment;
+import com.spammayo.spam.offercomment.entity.OfferComment;
 import com.spammayo.spam.study.entity.Study;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -30,9 +30,9 @@ public class Offer extends Auditable {
     private Study study;
 
     @OneToMany(mappedBy = "offer", cascade = CascadeType.REMOVE)
-    private List<Comment> comments = new ArrayList<>();
+    private List<OfferComment> comments = new ArrayList<>();
 
-    public void addComment(Comment comment) {
+    public void addComment(OfferComment comment) {
         comments.add(comment);
         comment.setOffer(this);
     }

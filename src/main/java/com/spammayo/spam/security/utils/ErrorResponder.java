@@ -1,6 +1,7 @@
 package com.spammayo.spam.security.utils;
 
 import com.google.gson.Gson;
+import com.spammayo.spam.exception.BusinessLogicException;
 import com.spammayo.spam.exception.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -14,6 +15,14 @@ public class ErrorResponder {
         ErrorResponse errorResponse = ErrorResponse.of(status);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setStatus(status.value());
+        response.getWriter().write(gson.toJson(errorResponse, ErrorResponse.class));
+    }
+
+    public static void sendCustomErrorResponse(HttpServletResponse response, BusinessLogicException businessLogicException) throws IOException {
+        Gson gson = new Gson();
+        ErrorResponse errorResponse = ErrorResponse.of(businessLogicException.getExceptionCode());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setStatus(businessLogicException.getExceptionCode().getStatus());
         response.getWriter().write(gson.toJson(errorResponse, ErrorResponse.class));
     }
 }

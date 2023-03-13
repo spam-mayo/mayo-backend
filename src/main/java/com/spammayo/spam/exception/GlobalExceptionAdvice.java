@@ -80,4 +80,11 @@ public class GlobalExceptionAdvice {
         log.error("MethodArgumentTypeMismatchException", e);
         return ErrorResponse.of(e.getMessage());
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleIllegalArgumentException(IllegalArgumentException e) {
+        log.error("IllegalArgumentException", e);
+        return ErrorResponse.of(e.getMessage());
+    }
 }

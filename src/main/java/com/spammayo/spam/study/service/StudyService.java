@@ -4,17 +4,23 @@ import com.spammayo.spam.exception.BusinessLogicException;
 import com.spammayo.spam.exception.ExceptionCode;
 import com.spammayo.spam.likes.Like;
 import com.spammayo.spam.likes.LikeRepository;
+import com.spammayo.spam.offer.repository.OfferRepository;
 import com.spammayo.spam.study.entity.Study;
 import com.spammayo.spam.study.entity.StudyUser;
 import com.spammayo.spam.study.repository.StudyRepository;
 import com.spammayo.spam.study.repository.StudyUserRepository;
 import com.spammayo.spam.user.entity.User;
+import com.spammayo.spam.user.repository.UserRepository;
 import com.spammayo.spam.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.LocalDate;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,26 +37,104 @@ public class StudyService {
     private final StudyUserRepository studyUserRepository;
     private final UserService userService;
     private final LikeRepository likeRepository;
+    private final OfferRepository offerRepository;
+    private final UserRepository userRepository;
 
     public Study createStudy(Study study) {
-        User user = userService.getLoginUser();
         StudyUser studyUser = new StudyUser();
-        studyUser.setUser(user);
+        studyUser.setUser(userService.getLoginUser());
         studyUser.setAdmin(true);
         studyUser.setApprovalStatus(StudyUser.ApprovalStatus.APPROVAL);
         study.addStudyUser(studyUser);
 
+        LocalDate startDate = LocalDate.parse(study.getStartDate());
+        LocalDate endDate = LocalDate.parse(study.getEndDate());
+        LocalDate today = LocalDate.now();
+
+        checkCorrectDates(startDate, endDate);
+
+        if (endDate.isBefore(today) || startDate.isBefore(today)) {
+            throw new BusinessLogicException(ExceptionCode.INVALID_DATE);
+        } else if (startDate.isEqual(today)) {
+            study.setStudyStatus(Study.StudyStatus.ONGOING);
+        }
+
         return studyRepository.save(study);
     }
 
+    private void checkCorrectDates(LocalDate startDate, LocalDate endDate) {
+        if (endDate.isBefore(startDate)) {
+            throw new BusinessLogicException(ExceptionCode.INVALID_DATE);
+        }
+    }
+
+    /*
+    ** 스터디 기간 수정 **
+    * 모집전/모집중 - 시작일, 종료일 모두 허용 (하지만 스터디 생성일 이전일 수 없음)
+    * 진행중 - 종료일만 허용
+    * 종료/폐쇄 - 스터디 수정 불가
+    * */
     public Study updateStudy(Study study) {
         Study findStudy = existStudy(study.getStudyId());
         //관리자만 접근 허용
         accessResource(findStudy);
+        checkClosedAndEndStudy(findStudy);
+        Study.StudyStatus studyStatus = study.getStudyStatus();
+
+        String originalStartDate = findStudy.getStartDate();
+        String originalEndDate = findStudy.getEndDate();
+        String changedStartDate = study.getStartDate();
+        String changedEndDate = study.getEndDate();
+
+        if (!originalStartDate.equals(changedStartDate) || !originalEndDate.equals(changedEndDate)) {
+            LocalDate today = LocalDate.now();
+            LocalDate startDate = LocalDate.parse(changedStartDate);
+            LocalDate endDate = LocalDate.parse(changedEndDate);
+            checkCorrectDates(startDate, endDate);
+
+            //공통 - 시작일은 생성일 이전일 수 없음
+            if (LocalDate.parse(findStudy.getCreatedAt().toLocalDate().toString()).isAfter(startDate)) {
+                throw new BusinessLogicException(ExceptionCode.INVALID_DATE);
+            }
+
+            //시작일 종료일 모두 수정하는 경우 (모집전, 모집중)
+            if (!originalStartDate.equals(changedStartDate) && !originalEndDate.equals(changedEndDate)) {
+
+                if (studyStatus == Study.StudyStatus.ONGOING) {
+                    throw new BusinessLogicException(ExceptionCode.INVALID_DATE);
+                }
+                findStudy.setStartDate(study.getStartDate());
+                findStudy.setEndDate(study.getEndDate());
+
+                if (startDate.isBefore(today)) {
+                    findStudy.setStudyStatus(Study.StudyStatus.ONGOING);
+                }
+                if (endDate.plusDays(1).isBefore(today)) {
+                    findStudy.setStudyStatus(Study.StudyStatus.END);
+                }
+            }
+            //시작일만 수정하는 경우 (모집전, 모집중)
+            else if (!study.getStartDate().equals(originalStartDate)) {
+                if (studyStatus == Study.StudyStatus.ONGOING) {
+                    throw new BusinessLogicException(ExceptionCode.INVALID_DATE);
+                }
+                findStudy.setStartDate(study.getStartDate());
+                if (startDate.isBefore(today)) {
+                    findStudy.setStudyStatus(Study.StudyStatus.ONGOING);
+                }
+            }
+            //종료일만 수정하는 경우(모집전, 모집중, 진행중)
+            else if (!study.getEndDate().equals(changedEndDate)) {
+                findStudy.setEndDate(study.getEndDate());
+
+                if (endDate.plusDays(1).isBefore(today)) {
+                    findStudy.setStudyStatus(Study.StudyStatus.END);
+                }
+            }
+        }
+
 
         findStudy.setStudyName(study.getStudyName());
-        findStudy.setStartDate(study.getStartDate());
-        findStudy.setEndDate(study.getStartDate());
         findStudy.setPersonnel(study.getPersonnel());
         findStudy.setOnline(study.isOnline());
         findStudy.setPlace(study.getPlace());
@@ -65,6 +149,17 @@ public class StudyService {
 
     public Study findStudy(long studyId) {
         Study findStudy = existStudy(studyId);
+        checkClosedStudy(findStudy);
+        Study.StudyStatus studyStatus = findStudy.getStudyStatus();
+        //모집전인 상태일 경우 작성자만 조회 가능
+        if (studyStatus == Study.StudyStatus.BEFORE_RECRUITMENT) {
+            String email = SecurityContextHolder.getContext().getAuthentication().getName();
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new BusinessLogicException(ExceptionCode.ACCESS_FORBIDDEN));
+            studyUserRepository.findByStudyAndUser(findStudy, user)
+                    .orElseThrow(() -> new BusinessLogicException(ExceptionCode.ACCESS_FORBIDDEN));
+        }
+
         findStudy.setViews(findStudy.getViews() + 1);
         return studyRepository.save(findStudy);
     }
@@ -72,15 +167,30 @@ public class StudyService {
     /*
     * 스터디 폐쇄시
     * 1. 상태값 : CLOSED
-    * 2. 신청 유저 삭제
-    * 3. 좋아요, 신청, 조회, 수정 등등.. 다 불가
+    * 2. 승인 유저 추방 후 폐쇄 가능
+    * 3. 좋아요, 참여 신청, 구인글 CRUD, 한개의 스터디 조회/수정 불가
     * 4. 오직 마이페이지에서만 조회 가능 (?)
     * */
     public void deleteStudy(long studyId) {
         Study study = existStudy(studyId);
         accessResource(study);
-        //TODO : 스터디 폐쇄시 처리로직 논의하기
-        studyRepository.delete(study);
+
+        long member = study.getStudyUsers()
+                .stream()
+                .filter(studyUser -> studyUser.getApprovalStatus() == StudyUser.ApprovalStatus.APPROVAL)
+                .count();
+
+        if (member > 1) {
+            throw new BusinessLogicException(ExceptionCode.STUDY_MEMBER_EXISTS);
+        }
+
+        //구인글 존재할 경우 삭제
+        if (study.getOffer() != null) {
+            offerRepository.delete(study.getOffer());
+        }
+
+        study.setStudyStatus(Study.StudyStatus.CLOSED);
+        studyRepository.save(study);
     }
 
     //tab : 참여중(crew), 생성(admin), 관심(likes) + 신청한(apply)
@@ -118,6 +228,7 @@ public class StudyService {
     public void checkLikes(long studyId) {
         User user = userService.getLoginUser();
         Study study = existStudy(studyId);
+        checkBeforeRecruitmentAndClosedStudy(study);
         Optional<Like> optionalLike = user.getLikes().stream().filter(like -> like.getStudy().getStudyId() == studyId).findAny();
 
         if (optionalLike.isPresent()) {
@@ -178,7 +289,7 @@ public class StudyService {
         List<Study> studies = studyRepository.findAll();
         if (sort == null || sort.equals("latest")) {
             studies.sort(Collections.reverseOrder(Comparator.comparing(Study::getStudyId)));
-        } else if (sort.equals("like")) {
+        } else if (sort.equals("likes")) {
             studies.sort(Collections.reverseOrder(Comparator.comparing(study -> study.getLikes().size())));
         } else if (sort.equals("deadline")) {
             LocalDate today = LocalDate.now();
@@ -207,8 +318,7 @@ public class StudyService {
 
     //관리자만 접근 가능
     public void accessResource(Study study) {
-        User user = userService.getLoginUser();
-        StudyUser studyUser = studyUserRepository.findByStudyAndUser(study, user)
+        StudyUser studyUser = studyUserRepository.findByStudyAndUser(study, userService.getLoginUser())
                 .orElseThrow(() -> new BusinessLogicException(ExceptionCode.UNAUTHORIZED));
 
         if (!studyUser.isAdmin()) {
@@ -231,7 +341,8 @@ public class StudyService {
         //진행중 -> 종료
         List<Study> proceedingStudies = studyRepository.findAllByStudyStatus(Study.StudyStatus.ONGOING);
         proceedingStudies.forEach(study -> {
-            if (study.getEndDate().equals(today.toString())) {
+            LocalDate endDate = LocalDate.parse(study.getEndDate()).plusDays(1);
+            if (endDate.isEqual(today)) {
                 study.setStudyStatus(Study.StudyStatus.END);
                 studyRepository.save(study);
             }
@@ -241,6 +352,7 @@ public class StudyService {
     //스터디 내부 (notice == null 이면 공지사항 없음)
     public void updateNotice(Study study) {
         Study findStudy = existStudy(study.getStudyId());
+        checkClosedStudy(findStudy);
         accessResource(findStudy);
         if (study.getNoticeTitle() == null) {
             findStudy.setNoticeTitle(null);
@@ -254,12 +366,14 @@ public class StudyService {
 
     public Study findNotice(long studyId) {
         Study findStudy = existStudy(studyId);
+        checkClosedStudy(findStudy);
         verifiedCrew(findStudy);
         return findStudy;
     }
 
     public void deleteNotice(long studyId) {
         Study findStudy = existStudy(studyId);
+        checkClosedStudy(findStudy);
         accessResource(findStudy);
         findStudy.setNoticeTitle(null);
         findStudy.setNoticeContent(null);
@@ -268,6 +382,7 @@ public class StudyService {
     //참가 신청
     public void userRequestForStudy(long studyId) {
         Study study = existStudy(studyId);
+        checkRecruitingAndOngoingStudy(study);
         User user = userService.getLoginUser();
         user.getStudyUsers().forEach(studyUser -> {
             if (studyUser.getStudy() == study) {
@@ -306,6 +421,7 @@ public class StudyService {
     public void assignStudyUser(long studyId, long userId, String assign) {
         Study study = existStudy(studyId);
         accessResource(study);
+        checkRecruitingAndOngoingStudy(study);
         User user = userService.getUser(userId);
         StudyUser studyUser = studyUserRepository.findByStudyAndUser(study, user)
                 .orElseThrow(() -> new BusinessLogicException(ExceptionCode.MEMBER_NOT_FOUND));
@@ -345,6 +461,36 @@ public class StudyService {
         Optional<StudyUser> optionalStudyUser = studyUserRepository.findByStudyAndUser(study, user);
         StudyUser studyUser = optionalStudyUser.orElseThrow(() -> new BusinessLogicException(ExceptionCode.ACCESS_FORBIDDEN));
         if (studyUser.getApprovalStatus() != StudyUser.ApprovalStatus.APPROVAL) {
+            throw new BusinessLogicException(ExceptionCode.ACCESS_FORBIDDEN);
+        }
+    }
+
+    //모집중, 진행중인 스터디만 허용
+    public void checkRecruitingAndOngoingStudy(Study study) {
+        if (study.getStudyStatus() != Study.StudyStatus.RECRUITING) {
+            throw new BusinessLogicException(ExceptionCode.STUDY_NOT_RECRUITING);
+        } else if (study.getStudyStatus() != Study.StudyStatus.ONGOING) {
+            throw new BusinessLogicException(ExceptionCode.STUDY_NOT_RECRUITING);
+        }
+    }
+
+    private void checkClosedStudy(Study study) {
+        if (study.getStudyStatus() == Study.StudyStatus.CLOSED) {
+            throw new BusinessLogicException(ExceptionCode.ACCESS_FORBIDDEN);
+        }
+    }
+
+    private void checkClosedAndEndStudy(Study study) {
+        Study.StudyStatus studyStatus = study.getStudyStatus();
+        if (studyStatus == Study.StudyStatus.CLOSED || studyStatus == Study.StudyStatus.END) {
+            throw new BusinessLogicException(ExceptionCode.ACCESS_FORBIDDEN);
+        }
+    }
+
+    private void checkBeforeRecruitmentAndClosedStudy(Study study) {
+        Study.StudyStatus studyStatus = study.getStudyStatus();
+        if (studyStatus == Study.StudyStatus.CLOSED ||
+            studyStatus == Study.StudyStatus.BEFORE_RECRUITMENT) {
             throw new BusinessLogicException(ExceptionCode.ACCESS_FORBIDDEN);
         }
     }

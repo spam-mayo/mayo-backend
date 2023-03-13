@@ -15,7 +15,7 @@ import javax.validation.constraints.Positive;
 
 @Validated
 @RestController
-@RequestMapping("/api/studyComment")
+@RequestMapping("/api/study-comment")
 @RequiredArgsConstructor
 public class StudyCommentController {
 

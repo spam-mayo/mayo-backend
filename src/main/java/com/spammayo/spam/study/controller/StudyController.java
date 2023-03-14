@@ -112,6 +112,13 @@ public class StudyController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    //신청 취소
+    @DeleteMapping("{study-id}/group")
+    public ResponseEntity deleteUserRequest(@PathVariable("study-id") @Positive long studyId) {
+        studyService.userCancelForStudy(studyId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
     @GetMapping("/{study-id}/users")
     public ResponseEntity getStudyUsers(@PathVariable("study-id") @Positive long studyId,
                                         @RequestParam @NotBlank String status,

@@ -397,6 +397,27 @@ public class StudyService {
         studyRepository.save(study);
     }
 
+    //신청 취소
+    public void userCancelForStudy(long studyId) {
+        Study study = existStudy(studyId);
+        //완료, 폐쇄, 모집전 상태면 불가
+        checkBeforeRecruitmentAndClosedStudy(study);
+        if (study.getStudyStatus() == Study.StudyStatus.END) {
+            throw new BusinessLogicException(ExceptionCode.ACCESS_FORBIDDEN);
+        }
+
+        StudyUser studyUser = studyUserRepository.findByStudyAndUser(study, userService.getLoginUser())
+                .orElseThrow(() -> new BusinessLogicException(ExceptionCode.ACCESS_FORBIDDEN));
+
+        //관리자는 취소 요청 불가
+        if (studyUser.isAdmin()) {
+            throw new BusinessLogicException(ExceptionCode.ACCESS_FORBIDDEN);
+        }
+
+        studyUserRepository.delete(studyUser);
+    }
+
+
     //admin - 참가신청자 조회
     //status : 승인, 대기중, 거절
     public Page<User> getStudyUser(long studyId, String status, int page, int size) {
@@ -467,9 +488,7 @@ public class StudyService {
 
     //모집중, 진행중인 스터디만 허용
     public void checkRecruitingAndOngoingStudy(Study study) {
-        if (study.getStudyStatus() != Study.StudyStatus.RECRUITING) {
-            throw new BusinessLogicException(ExceptionCode.STUDY_NOT_RECRUITING);
-        } else if (study.getStudyStatus() != Study.StudyStatus.ONGOING) {
+        if (study.getStudyStatus() != Study.StudyStatus.RECRUITING && study.getStudyStatus() != Study.StudyStatus.ONGOING) {
             throw new BusinessLogicException(ExceptionCode.STUDY_NOT_RECRUITING);
         }
     }

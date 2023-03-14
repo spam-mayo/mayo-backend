@@ -27,9 +27,9 @@ public class MemberAuthenticationFailureHandler implements AuthenticationFailure
     private void sendErrorResponse(HttpServletResponse response) throws IOException {
         Gson gson = new Gson();
 
-        ErrorResponse errorResponse = ErrorResponse.of(HttpStatus.UNAUTHORIZED);
+        ErrorResponse errorResponse = ErrorResponse.of(HttpStatus.BAD_REQUEST);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        response.setStatus(HttpStatus.BAD_REQUEST.value());
         response.getWriter().write(gson.toJson(errorResponse, ErrorResponse.class));
     }
 }

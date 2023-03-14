@@ -1,6 +1,8 @@
 package com.spammayo.spam.security.auth.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.spammayo.spam.exception.BusinessLogicException;
+import com.spammayo.spam.exception.ExceptionCode;
 import com.spammayo.spam.security.auth.jwt.JwtTokenizer;
 import com.spammayo.spam.security.dto.LoginDto;
 import com.spammayo.spam.security.utils.RedisUtils;
@@ -33,6 +35,10 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     @SneakyThrows
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
+        //로그인 http method : POST
+        if (!request.getMethod().equals("POST")) {
+            throw new BusinessLogicException(ExceptionCode.METHOD_NOT_ALLOWED);
+        }
         LoginDto loginDto = new LoginDto();
         UsernamePasswordAuthenticationToken authenticationToken;
         try {

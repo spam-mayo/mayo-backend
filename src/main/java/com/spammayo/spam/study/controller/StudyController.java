@@ -36,7 +36,7 @@ public class StudyController {
     }
 
     @PatchMapping("/{study-id}")
-    public ResponseEntity patchStudy(@PathVariable("study-id") long studyId,
+    public ResponseEntity patchStudy(@PathVariable("study-id") @Positive long studyId,
                                      @RequestBody @Validated StudyDto.PatchDto patchDto) {
         patchDto.setStudyId(studyId);
         Study study = studyService.updateStudy(mapper.patchDtoToStudy(patchDto));
@@ -44,7 +44,7 @@ public class StudyController {
     }
 
     @GetMapping("/{study-id}")
-    public ResponseEntity getStudy(@PathVariable("study-id") long studyId) {
+    public ResponseEntity getStudy(@PathVariable("study-id") @Positive long studyId) {
         Study study = studyService.findStudy(studyId);
         return new ResponseEntity<>(mapper.studyToResponseDto(study), HttpStatus.OK);
     }
@@ -64,14 +64,14 @@ public class StudyController {
 
     //스터디 폐쇄
     @DeleteMapping("/{study-id}")
-    public ResponseEntity deleteStudy(@PathVariable("study-id") long studyId) {
+    public ResponseEntity deleteStudy(@PathVariable("study-id") @Positive long studyId) {
         studyService.deleteStudy(studyId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     //좋아요
     @PostMapping("/{study-id}/likes")
-    public ResponseEntity postLikes(@PathVariable("study-id") long studyId) {
+    public ResponseEntity postLikes(@PathVariable("study-id") @Positive long studyId) {
         studyService.checkLikes(studyId);
         return new ResponseEntity<>(HttpStatus.OK);
     }

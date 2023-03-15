@@ -3,7 +3,6 @@ package com.spammayo.spam.studycomment.mapper;
 import com.spammayo.spam.studycomment.dto.StudyCommentDto;
 import com.spammayo.spam.studycomment.entity.StudyComment;
 import com.spammayo.spam.task.entity.Task;
-import com.spammayo.spam.user.entity.User;
 import org.mapstruct.Mapper;
 
 import java.util.List;
@@ -43,5 +42,5 @@ public interface StudyCommentMapper {
                 .build();
     }
 
-    List<StudyCommentDto.ResponseDto> studyCommentsToStudyCommentResponseDto(List<StudyComment> studyComments);
+    List<StudyCommentDto.AllResponseDto> studyCommentsToStudyCommentResponseDto(List<StudyComment> studyComments);
 }

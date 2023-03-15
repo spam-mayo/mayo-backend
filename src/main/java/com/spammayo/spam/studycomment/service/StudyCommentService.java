@@ -51,7 +51,12 @@ public class StudyCommentService {
 
     public StudyComment findComment(Long studyCommentId) { return verifiedComment(studyCommentId); }
 
-    public List<StudyComment> findComments() { return studyCommentRepository.findAll(); }
+    public List<StudyComment> findComments(Long studyId, String taskDate) {
+
+        Task task = taskService.findTask(studyId, taskDate);
+
+        return studyCommentRepository.findByTaskAndTask_TaskDate(task, taskDate);
+    }
 
     public void deleteComment(Long studyCommentId) {
 

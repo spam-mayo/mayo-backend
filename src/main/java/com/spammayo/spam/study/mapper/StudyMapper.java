@@ -35,8 +35,8 @@ public interface StudyMapper {
             study.setOnline(true);
         } else {
             study.setPlace( postDto.getPlace() );
-            study.setPlaceDetails( postDto.getPlaceDetails() );
-            study.setAddress( postDto.getAddress() );
+            study.setLatitude( postDto.getLatitude() );
+            study.setLongitude( postDto.getLongitude() );
         }
 
         study.setActivity( postDto.getActivity() );
@@ -74,13 +74,13 @@ public interface StudyMapper {
         if (patchDto.isOnline()) {
             study.setOnline(true);
             study.setPlace(null);
-            study.setPlaceDetails(null);
-            study.setAddress(null);
+            study.setLongitude(null);
+            study.setLatitude(null);
         } else {
             study.setOnline(false);
             study.setPlace( patchDto.getPlace() );
-            study.setPlaceDetails( patchDto.getPlaceDetails() );
-            study.setAddress( patchDto.getAddress() );
+            study.setLongitude( patchDto.getLongitude() );
+            study.setLatitude( patchDto.getLatitude() );
         }
 
         study.setActivity( patchDto.getActivity() );
@@ -117,8 +117,8 @@ public interface StudyMapper {
         responseDto.setEndDate( study.getEndDate() );
         responseDto.setPersonnel( study.getPersonnel() );
         responseDto.setPlace( study.getPlace() );
-        responseDto.setPlaceDetails( study.getPlaceDetails() );
-        responseDto.setAddress( study.getAddress() );
+        responseDto.setLatitude( study.getLatitude() );
+        responseDto.setLongitude( study.getLongitude() );
         responseDto.setActivity( study.getActivity() );
         responseDto.setPeriod( study.getPeriod() );
         responseDto.setStudyStatus( study.getStudyStatus() );

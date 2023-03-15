@@ -138,8 +138,8 @@ public class StudyService {
         findStudy.setPersonnel(study.getPersonnel());
         findStudy.setOnline(study.isOnline());
         findStudy.setPlace(study.getPlace());
-        findStudy.setPlaceDetails(study.getPlaceDetails());
-        findStudy.setAddress(study.getAddress());
+        findStudy.setLatitude(study.getLatitude());
+        findStudy.setLongitude(study.getLongitude());
         findStudy.setActivity(study.getActivity());
         findStudy.setPeriod(study.getPeriod());
         findStudy.setStudyStacks(study.getStudyStacks());

@@ -39,9 +39,9 @@ public class Study extends Auditable {
 
     private String place;
 
-    private String placeDetails;
+    private Double latitude; //위도
 
-    private String address;
+    private Double longitude; //경도
 
     private String activity;
 

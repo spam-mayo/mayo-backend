@@ -36,8 +36,8 @@ public class StudyDto {
         private boolean online;
         private String place;
 
-        private String placeDetails;
-        private String address;
+        private Double latitude;
+        private Double longitude;
         private String activity;
         private String period;
         private List<StackDto> studyStacks;
@@ -65,8 +65,8 @@ public class StudyDto {
         private boolean online;
         private String place;
 
-        private String placeDetails;
-        private String address;
+        private Double latitude;
+        private Double longitude;
         private String activity;
         private String period;
         private List<StackDto> studyStacks;
@@ -91,8 +91,8 @@ public class StudyDto {
         private String endDate;
         private String personnel;
         private String place;
-        private String placeDetails;
-        private String address;
+        private Double latitude;
+        private Double longitude;
         private String activity;
         private String period;
         private Study.StudyStatus studyStatus;

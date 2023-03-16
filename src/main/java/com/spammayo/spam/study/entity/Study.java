@@ -1,5 +1,6 @@
 package com.spammayo.spam.study.entity;
 
+import com.spammayo.spam.audit.Auditable;
 import com.spammayo.spam.likes.Like;
 import com.spammayo.spam.offer.entity.Offer;
 import com.spammayo.spam.task.entity.Task;
@@ -15,7 +16,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @Entity
-public class Study {
+public class Study extends Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,9 +39,9 @@ public class Study {
 
     private String place;
 
-    private String placeDetails;
+    private Double latitude; //위도
 
-    private String address;
+    private Double longitude; //경도
 
     private String activity;
 

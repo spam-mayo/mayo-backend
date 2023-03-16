@@ -116,7 +116,7 @@ public class OAuth2MemberSuccessHandler extends SimpleUrlAuthenticationSuccessHa
                 .scheme("https")
                 .host("mayo-frontend-47zd.vercel.app")
 //                .port(80)
-                .path("/loading")
+                .path("/auth/loading")
                 .queryParams(queryParams)
                 .build()
                 .toUri();

@@ -37,6 +37,7 @@ public class StudyCommentDto {
     @AllArgsConstructor
     public static class ResponseDto {
         private Long studyCommentId;
+        private String taskDate;
         private String comment;
     }
 
@@ -44,6 +45,9 @@ public class StudyCommentDto {
     @Builder
     @AllArgsConstructor
     public static class AllResponseDto {
+        private String userName;
+        private String profileUrl;
+        private String createdAt;
         private Long studyCommentId;
         private String comment;
     }

@@ -6,6 +6,7 @@ import com.spammayo.spam.task.entity.Task;
 import org.mapstruct.Mapper;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
 public interface StudyCommentMapper {
@@ -38,9 +39,21 @@ public interface StudyCommentMapper {
 
         return StudyCommentDto.ResponseDto.builder()
                 .studyCommentId(studyComment.getStudyCommentId())
+                .taskDate(studyComment.getTask().getTaskDate())
                 .comment(studyComment.getComment())
                 .build();
     }
 
-    List<StudyCommentDto.AllResponseDto> studyCommentsToStudyCommentResponseDto(List<StudyComment> studyComments);
+    default List<StudyCommentDto.AllResponseDto> studyCommentsToStudyCommentResponseDto(List<StudyComment> studyComments) {
+
+        return studyComments.stream()
+                .map(studycomment -> StudyCommentDto.AllResponseDto.builder()
+                        .userName(studycomment.getUser().getUserName())
+                        .profileUrl(studycomment.getUser().getProfileUrl())
+                        .createdAt(studycomment.getCreatedAt().toString())
+                        .studyCommentId(studycomment.getStudyCommentId())
+                        .comment(studycomment.getComment())
+                        .build())
+                .collect(Collectors.toList());
+    }
 }

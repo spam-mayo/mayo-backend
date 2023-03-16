@@ -116,7 +116,7 @@ public class UserService {
         }
 
         //no image == basic image
-        if (multipartFile.isEmpty()) {
+        if (multipartFile == null || multipartFile.isEmpty()) {
             setBasicImage(user);
             return userRepository.save(user);
         }

@@ -2,6 +2,8 @@ package com.spammayo.spam.studycomment.service;
 
 import com.spammayo.spam.exception.BusinessLogicException;
 import com.spammayo.spam.exception.ExceptionCode;
+import com.spammayo.spam.study.entity.StudyUser;
+import com.spammayo.spam.study.repository.StudyUserRepository;
 import com.spammayo.spam.studycomment.entity.StudyComment;
 import com.spammayo.spam.studycomment.repository.StudyCommentRepository;
 import com.spammayo.spam.task.entity.Task;
@@ -23,6 +25,7 @@ public class StudyCommentService {
     private final StudyCommentRepository studyCommentRepository;
     private final TaskService taskService;
     private final UserService userService;
+    private final StudyUserRepository studyUserRepository;
 
     public StudyComment createComment(StudyComment studyComment,
                                       Long taskId,
@@ -58,12 +61,14 @@ public class StudyCommentService {
         return studyCommentRepository.findByTaskAndTask_TaskDate(task, taskDate);
     }
 
-    public void deleteComment(Long studyCommentId) {
+    public void deleteComment(Long studyCommentId, Long studyUserId) {
 
         StudyComment findComment = verifiedComment(studyCommentId);
 
-        // TODO : 스터디 방장 권한 추가
-        if (!findComment.getUser().getEmail().equals(userService.getLoginUser().getEmail())) {
+        StudyUser studyUser = studyUserRepository.findById(studyUserId)
+                .orElseThrow(() -> new BusinessLogicException(ExceptionCode.MEMBER_NOT_FOUND));
+
+        if (!findComment.getUser().getEmail().equals(userService.getLoginUser().getEmail()) && !studyUser.isAdmin()) {
             throw new BusinessLogicException(ExceptionCode.ACCESS_FORBIDDEN);
         }
 

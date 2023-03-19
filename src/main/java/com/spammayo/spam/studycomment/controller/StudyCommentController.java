@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import java.util.List;
 
@@ -67,9 +68,10 @@ public class StudyCommentController {
     }
 
     @DeleteMapping("/{studyCommentId}")
-    public ResponseEntity deleteComment(@PathVariable("studyCommentId") @Positive Long studyCommentId) {
+    public ResponseEntity deleteComment(@PathVariable("studyCommentId") @Positive Long studyCommentId,
+                                        @RequestParam @NotNull Long studyUserId) {
 
-        studyCommentService.deleteComment(studyCommentId);
+        studyCommentService.deleteComment(studyCommentId, studyUserId);
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

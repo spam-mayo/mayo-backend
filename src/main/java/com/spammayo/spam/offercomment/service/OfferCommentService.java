@@ -6,15 +6,19 @@ import com.spammayo.spam.offer.entity.Offer;
 import com.spammayo.spam.offer.service.OfferService;
 import com.spammayo.spam.offercomment.entity.OfferComment;
 import com.spammayo.spam.offercomment.repository.OfferCommentRepository;
+import com.spammayo.spam.study.entity.StudyUser;
+import com.spammayo.spam.study.repository.StudyUserRepository;
 import com.spammayo.spam.user.entity.User;
 import com.spammayo.spam.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -22,6 +26,7 @@ public class OfferCommentService {
     private final OfferCommentRepository offerCommentRepository;
     private final UserService userService;
     private final OfferService offerService;
+    private final StudyUserRepository studyUserRepository;
 
     public OfferComment createComment(OfferComment comment,
                                       Long offerId) {
@@ -41,7 +46,6 @@ public class OfferCommentService {
 
         OfferComment findComment = verifiedComment(offerCommentId);
 
-        // TODO : 스터디 방장 권한 추가
         if (!findComment.getUser().getEmail().equals(userService.getLoginUser().getEmail())) {
             throw new BusinessLogicException(ExceptionCode.ACCESS_FORBIDDEN);
         }
@@ -63,18 +67,20 @@ public class OfferCommentService {
         return offerCommentRepository.findAll();
     }
 
-    public void deleteComment(Long offerCommentId) {
+    public void deleteComment(Long offerCommentId, Long studyUserId) {
 
         OfferComment findComment = verifiedComment(offerCommentId);
 
-        // TODO : 스터디 방장 권한 추가
-        if (!findComment.getUser().getEmail().equals(userService.getLoginUser().getEmail())) {
+        StudyUser studyUser = studyUserRepository.findById(studyUserId)
+                .orElseThrow(() -> new BusinessLogicException(ExceptionCode.MEMBER_NOT_FOUND));
+
+        if (!findComment.getUser().getEmail().equals(userService.getLoginUser().getEmail()) && !studyUser.isAdmin()) {
             throw new BusinessLogicException(ExceptionCode.ACCESS_FORBIDDEN);
         }
 
         offerCommentRepository.delete(findComment);
     }
-    // 댓글 존재 여부
+
     private OfferComment verifiedComment(Long offerCommentId) {
 
         return offerCommentRepository.findById(offerCommentId)

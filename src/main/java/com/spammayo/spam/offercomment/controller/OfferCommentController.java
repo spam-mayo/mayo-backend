@@ -4,7 +4,6 @@ import com.spammayo.spam.offercomment.dto.OfferCommentDto;
 import com.spammayo.spam.offercomment.entity.OfferComment;
 import com.spammayo.spam.offercomment.mapper.OfferCommentMapper;
 import com.spammayo.spam.offercomment.service.OfferCommentService;
-import com.spammayo.spam.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +11,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import java.util.List;
 
@@ -65,9 +65,10 @@ public class OfferCommentController {
     }
 
     @DeleteMapping("/{offerCommentId}")
-    public ResponseEntity deleteComment(@PathVariable("offerCommentId") @Positive Long offerCommentId) {
+    public ResponseEntity deleteComment(@PathVariable("offerCommentId") @Positive Long offerCommentId,
+                                        @RequestParam @NotNull Long studyUserId) {
 
-        offerCommentService.deleteComment(offerCommentId);
+        offerCommentService.deleteComment(offerCommentId, studyUserId);
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

@@ -1,5 +1,6 @@
 package com.spammayo.spam.offercomment.controller;
 
+import com.spammayo.spam.offer.service.OfferService;
 import com.spammayo.spam.offercomment.dto.OfferCommentDto;
 import com.spammayo.spam.offercomment.entity.OfferComment;
 import com.spammayo.spam.offercomment.mapper.OfferCommentMapper;
@@ -13,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
-import java.util.List;
 
 @Validated
 @RestController
@@ -21,6 +21,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OfferCommentController {
 
+    private final OfferService offerService;
     private final OfferCommentService offerCommentService;
     private final OfferCommentMapper offerCommentMapper;
 
@@ -49,19 +50,19 @@ public class OfferCommentController {
         return new ResponseEntity<>(offerCommentMapper.commentToCommentResponseDto(offerComment), HttpStatus.OK);
     }
 
-    @GetMapping("/{offerCommentId}")
-    public ResponseEntity getComment(@PathVariable("offerCommentId") @Positive Long offerCommentId) {
+//    @GetMapping("/{offerCommentId}")
+//    public ResponseEntity getComment(@PathVariable("offerCommentId") @Positive Long offerCommentId) {
+//        OfferComment offerComment = offerCommentService.findComment(offerCommentId);
+//
+//        return new ResponseEntity<>(offerCommentMapper.commentToCommentResponseDto(offerComment), HttpStatus.OK);
+//    }
+
+    @GetMapping("{offerCommentId}")
+    public ResponseEntity getComments(@PathVariable("offerCommentId") Long offerCommentId) {
+
         OfferComment offerComment = offerCommentService.findComment(offerCommentId);
 
-        return new ResponseEntity<>(offerCommentMapper.commentToCommentResponseDto(offerComment), HttpStatus.OK);
-    }
-
-    @GetMapping
-    public ResponseEntity getComments() {
-
-        List<OfferComment> offerComments = offerCommentService.findComments();
-
-        return new ResponseEntity<>(offerCommentMapper.commentsToCommentResponseDto(offerComments), HttpStatus.OK);
+        return offerCommentService.findAll(offerComment);
     }
 
     @DeleteMapping("/{offerCommentId}")

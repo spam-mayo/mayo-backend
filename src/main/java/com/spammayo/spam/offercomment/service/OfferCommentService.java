@@ -4,14 +4,19 @@ import com.spammayo.spam.exception.BusinessLogicException;
 import com.spammayo.spam.exception.ExceptionCode;
 import com.spammayo.spam.offer.entity.Offer;
 import com.spammayo.spam.offer.service.OfferService;
+import com.spammayo.spam.offercomment.dto.OfferCommentDto;
 import com.spammayo.spam.offercomment.entity.OfferComment;
+import com.spammayo.spam.offercomment.mapper.OfferCommentMapper;
 import com.spammayo.spam.offercomment.repository.OfferCommentRepository;
+import com.spammayo.spam.offerreply.repository.OfferReplyRepository;
 import com.spammayo.spam.study.entity.StudyUser;
 import com.spammayo.spam.study.repository.StudyUserRepository;
 import com.spammayo.spam.user.entity.User;
 import com.spammayo.spam.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +32,8 @@ public class OfferCommentService {
     private final UserService userService;
     private final OfferService offerService;
     private final StudyUserRepository studyUserRepository;
+    private final OfferCommentMapper offerCommentMapper;
+    private final OfferReplyRepository offerReplyRepository;
 
     public OfferComment createComment(OfferComment comment,
                                       Long offerId) {
@@ -61,6 +68,14 @@ public class OfferCommentService {
 
     public OfferComment findComment(Long offerCommentId) {
         return verifiedComment(offerCommentId);
+    }
+
+    @Transactional(readOnly = true)
+    public ResponseEntity findAll(OfferComment offerComment) {
+
+        OfferCommentDto.AllResponseDto response = offerCommentMapper.commentsToCommentAllResponseDto(offerComment, offerReplyRepository);
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     public List<OfferComment> findComments() {

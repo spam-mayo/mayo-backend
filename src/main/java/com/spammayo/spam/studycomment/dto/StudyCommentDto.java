@@ -51,12 +51,4 @@ public class StudyCommentDto {
         private Long studyCommentId;
         private String comment;
     }
-
-    @Getter
-    @Builder
-    @AllArgsConstructor
-    public static class AllResponseDto {
-        private Long studyCommentId;
-        private String comment;
-    }
 }

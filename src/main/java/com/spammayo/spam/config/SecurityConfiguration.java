@@ -53,6 +53,7 @@ public class SecurityConfiguration {
                         .antMatchers(HttpMethod.PATCH, "/api/auth/password/**").permitAll()
                         .antMatchers(HttpMethod.DELETE, "/api/users").hasRole("USER")
                         .antMatchers("/h2/**").permitAll()
+                        .antMatchers(HttpMethod.OPTIONS).permitAll()
                         .antMatchers("/oauth2/**", "/loading/**", "/api/auth/**").permitAll()
                         .anyRequest().authenticated()
                 )

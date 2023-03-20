@@ -37,7 +37,7 @@ public class StudyController {
 
     @PatchMapping("/{study-id}")
     public ResponseEntity patchStudy(@PathVariable("study-id") @Positive long studyId,
-                                     @RequestBody @Validated StudyDto.PatchDto patchDto) {
+                                     @RequestBody @Valid StudyDto.PatchDto patchDto) {
         patchDto.setStudyId(studyId);
         Study study = studyService.updateStudy(mapper.patchDtoToStudy(patchDto));
         return new ResponseEntity<>(mapper.studyToSimpleResponseDto(study), HttpStatus.OK);
@@ -52,12 +52,13 @@ public class StudyController {
     @GetMapping
     public ResponseEntity getStudies(@RequestParam @Positive int page,
                                      @RequestParam @Positive int size,
-                                     @RequestParam(required = false) String field,
+                                     @RequestParam(required = false) List<String> field,
                                      @RequestParam(required = false) String stack,
                                      @RequestParam(required = false) String sort,
                                      @RequestParam(required = false) String area,
-                                     @RequestParam(required = false) Study.StudyStatus status) {
-        Page<Study> pages = studyService.findStudies(page - 1, size, field, stack, sort, area, status);
+                                     @RequestParam(required = false) String status,
+                                     @RequestParam(required = false) String search) {
+        Page<Study> pages = studyService.findStudies(page - 1, size, field, stack, sort, area, status, search);
         List<Study> studies = pages.getContent();
         return new ResponseEntity<>(new MultiResponseDto<>(mapper.studiesToListResponseDto(studies), pages), HttpStatus.OK);
     }
@@ -79,9 +80,12 @@ public class StudyController {
     //마이페아지 - 회원의 스터디
     @GetMapping("/my-page")
     public ResponseEntity getUserStudy(@RequestParam(required = false) String tab,
-                                       @RequestParam(required = false) String status) {
-        List<Study> userStudy = studyService.getUserStudy(tab, status);
-        return new ResponseEntity<>(mapper.studiesToMyPageResponseDto(userStudy), HttpStatus.OK);
+                                       @RequestParam(required = false) String status,
+                                       @RequestParam @Positive int page,
+                                       @RequestParam @Positive int size) {
+        Page<Study> pages = studyService.getUserStudy(tab, status, page - 1, size);
+        List<Study> studies = pages.getContent();
+        return new ResponseEntity<>(new MultiResponseDto<>(mapper.studiesToMyPageResponseDto(studies), pages), HttpStatus.OK);
     }
 
     //관리자 - 공지사항
@@ -121,7 +125,7 @@ public class StudyController {
 
     @GetMapping("/{study-id}/users")
     public ResponseEntity getStudyUsers(@PathVariable("study-id") @Positive long studyId,
-                                        @RequestParam @NotBlank String status,
+                                        @RequestParam(required = false) String status,
                                         @RequestParam @Positive int page,
                                         @RequestParam @Positive int size) {
         Page<User> pages = studyService.getStudyUser(studyId, status, page - 1, size);

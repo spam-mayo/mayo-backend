@@ -2,6 +2,7 @@ package com.spammayo.spam.study.mapper;
 
 import com.spammayo.spam.stack.dto.StackDto;
 import com.spammayo.spam.stack.entity.Stack;
+import com.spammayo.spam.status.StudyStatus;
 import com.spammayo.spam.study.dto.StudyDto;
 import com.spammayo.spam.study.entity.Study;
 import com.spammayo.spam.study.entity.StudyStack;
@@ -41,7 +42,7 @@ public interface StudyMapper {
 
         study.setActivity( postDto.getActivity() );
         study.setPeriod( postDto.getPeriod() );
-        study.setStudyStatus(Study.StudyStatus.BEFORE_RECRUITMENT);
+        study.setStudyStatus(StudyStatus.BEFORE_RECRUITMENT);
 
         List<StackDto> studyStacks = postDto.getStudyStacks();
 
@@ -123,6 +124,7 @@ public interface StudyMapper {
         responseDto.setPeriod( study.getPeriod() );
         responseDto.setStudyStatus( study.getStudyStatus() );
         responseDto.setOnline( study.isOnline() );
+        responseDto.setCreatedAt( study.getCreatedAt().toLocalDate() );
 
         StudyUser studyUser = study.getStudyUsers().stream().filter(StudyUser::isAdmin).findFirst().orElseThrow();
         User admin = studyUser.getUser();
@@ -200,12 +202,15 @@ public interface StudyMapper {
             myPageResponseDto.setStudyStatus( study.getStudyStatus() );
 
             String email = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
-            StudyUser findStudyUser = study.getStudyUsers().stream().filter(studyUser -> studyUser.getUser().getEmail().equals(email)).findFirst().orElseThrow();
+            StudyUser findStudyUser = study.getStudyUsers().stream().filter(studyUser -> studyUser.getUser().getEmail().equals(email)).findFirst().orElse(null);
 
-            if (findStudyUser.isAdmin()) {
-                myPageResponseDto.setAdmin(true);
+            if (findStudyUser == null) {
+                myPageResponseDto.setAdmin(false);
+                myPageResponseDto.setApprovalStatus(null);
+            } else {
+                myPageResponseDto.setAdmin(findStudyUser.isAdmin());
+                myPageResponseDto.setApprovalStatus(findStudyUser.getApprovalStatus());
             }
-            myPageResponseDto.setApprovalStatus(findStudyUser.getApprovalStatus());
 
             study.getStudyStacks().forEach(ss -> {
                 Stack stack = ss.getStack();

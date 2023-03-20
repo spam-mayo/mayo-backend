@@ -86,6 +86,7 @@ public interface UserMapper {
             listResponseDto.setCreatedAt(user.getCreatedAt().toLocalDate().toString());
             StudyUser findStudyUser = user.getStudyUsers().stream().filter(studyUser -> studyUser.getStudy().getStudyId() == studyId).findAny().orElseThrow();
             listResponseDto.setApplicationDate(findStudyUser.getCreatedAt().toLocalDate().toString());
+            listResponseDto.setApprovalStatus(findStudyUser.getApprovalStatus());
             list.add(listResponseDto);
         }
 

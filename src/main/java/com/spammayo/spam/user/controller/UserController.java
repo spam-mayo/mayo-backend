@@ -62,6 +62,6 @@ public class UserController {
     public ResponseEntity updateProfileImage(@PathVariable("user-id") @Positive long userId,
                                              MultipartFile image) throws IOException {
         User user = userService.updateProfileImage(image, userId);
-        return new ResponseEntity(mapper.userToSimpleResponseDto(user), HttpStatus.OK);
+        return new ResponseEntity<>(mapper.userToSimpleResponseDto(user), HttpStatus.OK);
     }
 }

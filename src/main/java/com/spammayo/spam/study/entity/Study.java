@@ -3,6 +3,10 @@ package com.spammayo.spam.study.entity;
 import com.spammayo.spam.audit.Auditable;
 import com.spammayo.spam.likes.Like;
 import com.spammayo.spam.offer.entity.Offer;
+import com.spammayo.spam.status.Field;
+import com.spammayo.spam.status.Period;
+import com.spammayo.spam.status.Personnel;
+import com.spammayo.spam.status.StudyStatus;
 import com.spammayo.spam.task.entity.Task;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -34,8 +38,8 @@ public class Study extends Auditable {
     @Column(nullable = false)
     private String endDate;
 
-    @Column(nullable = false)
-    private String personnel;
+    @Enumerated(EnumType.STRING)
+    private Personnel personnel;
 
     private String place;
 
@@ -43,9 +47,12 @@ public class Study extends Auditable {
 
     private Double longitude; //경도
 
-    private String activity;
+    @ElementCollection(fetch = FetchType.LAZY)
+    @Enumerated(EnumType.STRING)
+    private List<Field> activity;
 
-    private String period;
+    @Enumerated(EnumType.STRING)
+    private Period period;
 
     @Enumerated(EnumType.STRING)
     private StudyStatus studyStatus;
@@ -94,23 +101,5 @@ public class Study extends Auditable {
         tasks.add(Task);
         Task.setStudy(this);
     }
-
-    public enum StudyStatus {
-
-        BEFORE_RECRUITMENT("모집전"),
-        RECRUITING("모집중"),
-        ONGOING("진행중"),
-        END("종료"),
-        CLOSED("폐쇄");
-
-        @Getter
-        @Setter
-        private String status;
-
-        StudyStatus(String status) {
-            this.status = status;
-        }
-    }
-
 
 }

@@ -1,6 +1,7 @@
 package com.spammayo.spam.study.entity;
 
 import com.spammayo.spam.audit.Auditable;
+import com.spammayo.spam.status.ApprovalStatus;
 import com.spammayo.spam.user.entity.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -31,16 +32,4 @@ public class StudyUser extends Auditable {
     @JoinColumn(name = "USER_ID")
     private User user;
 
-    public enum ApprovalStatus {
-        APPROVAL("승인"),
-        REJECT("거절"),
-        WAITING("대기중");
-
-        @Getter
-        private String status;
-
-        ApprovalStatus(String status) {
-            this.status = status;
-        }
-    }
 }

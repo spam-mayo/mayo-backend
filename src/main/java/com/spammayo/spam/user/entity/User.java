@@ -2,6 +2,7 @@ package com.spammayo.spam.user.entity;
 
 import com.spammayo.spam.audit.Auditable;
 import com.spammayo.spam.likes.Like;
+import com.spammayo.spam.status.Field;
 import com.spammayo.spam.study.entity.StudyUser;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -39,8 +40,8 @@ public class User extends Auditable {
     @Column(nullable = false)
     private String profileKey;
 
-    @Column
-    private String field;
+    @Enumerated(EnumType.STRING)
+    private Field field;
 
     @ElementCollection(fetch = FetchType.LAZY)
     private List<String> roles = new ArrayList<>();

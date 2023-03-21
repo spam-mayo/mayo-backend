@@ -5,6 +5,10 @@ import com.spammayo.spam.exception.ExceptionCode;
 import com.spammayo.spam.likes.Like;
 import com.spammayo.spam.likes.LikeRepository;
 import com.spammayo.spam.offer.repository.OfferRepository;
+import com.spammayo.spam.status.ApprovalStatus;
+import com.spammayo.spam.status.Area;
+import com.spammayo.spam.status.Field;
+import com.spammayo.spam.status.StudyStatus;
 import com.spammayo.spam.study.entity.Study;
 import com.spammayo.spam.study.entity.StudyUser;
 import com.spammayo.spam.study.repository.StudyRepository;
@@ -44,7 +48,7 @@ public class StudyService {
         StudyUser studyUser = new StudyUser();
         studyUser.setUser(userService.getLoginUser());
         studyUser.setAdmin(true);
-        studyUser.setApprovalStatus(StudyUser.ApprovalStatus.APPROVAL);
+        studyUser.setApprovalStatus(ApprovalStatus.APPROVAL);
         study.addStudyUser(studyUser);
 
         LocalDate startDate = LocalDate.parse(study.getStartDate());
@@ -56,7 +60,7 @@ public class StudyService {
         if (endDate.isBefore(today) || startDate.isBefore(today)) {
             throw new BusinessLogicException(ExceptionCode.INVALID_DATE);
         } else if (startDate.isEqual(today)) {
-            study.setStudyStatus(Study.StudyStatus.ONGOING);
+            study.setStudyStatus(StudyStatus.ONGOING);
         }
 
         return studyRepository.save(study);
@@ -79,7 +83,7 @@ public class StudyService {
         //관리자만 접근 허용
         accessResource(findStudy);
         checkClosedAndEndStudy(findStudy);
-        Study.StudyStatus studyStatus = study.getStudyStatus();
+        StudyStatus studyStatus = study.getStudyStatus();
 
         String originalStartDate = findStudy.getStartDate();
         String originalEndDate = findStudy.getEndDate();
@@ -100,27 +104,27 @@ public class StudyService {
             //시작일 종료일 모두 수정하는 경우 (모집전, 모집중)
             if (!originalStartDate.equals(changedStartDate) && !originalEndDate.equals(changedEndDate)) {
 
-                if (studyStatus == Study.StudyStatus.ONGOING) {
+                if (studyStatus == StudyStatus.ONGOING) {
                     throw new BusinessLogicException(ExceptionCode.INVALID_DATE);
                 }
                 findStudy.setStartDate(study.getStartDate());
                 findStudy.setEndDate(study.getEndDate());
 
                 if (startDate.isBefore(today)) {
-                    findStudy.setStudyStatus(Study.StudyStatus.ONGOING);
+                    findStudy.setStudyStatus(StudyStatus.ONGOING);
                 }
                 if (endDate.plusDays(1).isBefore(today)) {
-                    findStudy.setStudyStatus(Study.StudyStatus.END);
+                    findStudy.setStudyStatus(StudyStatus.END);
                 }
             }
             //시작일만 수정하는 경우 (모집전, 모집중)
             else if (!study.getStartDate().equals(originalStartDate)) {
-                if (studyStatus == Study.StudyStatus.ONGOING) {
+                if (studyStatus == StudyStatus.ONGOING) {
                     throw new BusinessLogicException(ExceptionCode.INVALID_DATE);
                 }
                 findStudy.setStartDate(study.getStartDate());
                 if (startDate.isBefore(today)) {
-                    findStudy.setStudyStatus(Study.StudyStatus.ONGOING);
+                    findStudy.setStudyStatus(StudyStatus.ONGOING);
                 }
             }
             //종료일만 수정하는 경우(모집전, 모집중, 진행중)
@@ -128,7 +132,7 @@ public class StudyService {
                 findStudy.setEndDate(study.getEndDate());
 
                 if (endDate.plusDays(1).isBefore(today)) {
-                    findStudy.setStudyStatus(Study.StudyStatus.END);
+                    findStudy.setStudyStatus(StudyStatus.END);
                 }
             }
         }
@@ -150,9 +154,9 @@ public class StudyService {
     public Study findStudy(long studyId) {
         Study findStudy = existStudy(studyId);
         checkClosedStudy(findStudy);
-        Study.StudyStatus studyStatus = findStudy.getStudyStatus();
+        StudyStatus studyStatus = findStudy.getStudyStatus();
         //모집전인 상태일 경우 작성자만 조회 가능
-        if (studyStatus == Study.StudyStatus.BEFORE_RECRUITMENT) {
+        if (studyStatus == StudyStatus.BEFORE_RECRUITMENT) {
             String email = SecurityContextHolder.getContext().getAuthentication().getName();
             User user = userRepository.findByEmail(email)
                     .orElseThrow(() -> new BusinessLogicException(ExceptionCode.ACCESS_FORBIDDEN));
@@ -177,7 +181,7 @@ public class StudyService {
 
         long member = study.getStudyUsers()
                 .stream()
-                .filter(studyUser -> studyUser.getApprovalStatus() == StudyUser.ApprovalStatus.APPROVAL)
+                .filter(studyUser -> studyUser.getApprovalStatus() == ApprovalStatus.APPROVAL)
                 .count();
 
         if (member > 1) {
@@ -189,40 +193,46 @@ public class StudyService {
             offerRepository.delete(study.getOffer());
         }
 
-        study.setStudyStatus(Study.StudyStatus.CLOSED);
+        study.setStudyStatus(StudyStatus.CLOSED);
         studyRepository.save(study);
     }
 
     //tab : 참여중(crew), 생성(admin), 관심(likes) + 신청한(apply)
     //status : 전체, 진행중, 모집중, 모집전, 완료, 폐쇄
-    public List<Study> getUserStudy(String tab, String status) {
+    public Page<Study> getUserStudy(String tab, String status, int page, int size) {
 
         List<StudyUser> studyUsers = userService.getLoginUser().getStudyUsers();
-        List<Study> studies;
+        List<Study> studies = new ArrayList<>();
         if (tab != null) {
             if (tab.equals("crew")) {
-                studyUsers = studyUsers.stream().filter(studyUser -> studyUser.getApprovalStatus().equals(StudyUser.ApprovalStatus.APPROVAL)).collect(Collectors.toList());
+                studyUsers = studyUsers.stream().filter(studyUser -> studyUser.getApprovalStatus().equals(ApprovalStatus.APPROVAL)).collect(Collectors.toList());
             } else if (tab.equals("apply")) {
-                studyUsers = studyUsers.stream().filter(studyUser -> !(studyUser.getApprovalStatus().equals(StudyUser.ApprovalStatus.APPROVAL))).collect(Collectors.toList());
+                studyUsers = studyUsers.stream().filter(studyUser -> !(studyUser.getApprovalStatus().equals(ApprovalStatus.APPROVAL))).collect(Collectors.toList());
             } else if (tab.equals("admin")) {
                 studyUsers = studyUsers.stream().filter(StudyUser::isAdmin).collect(Collectors.toList());
             } else if (tab.equals("likes")) {
                 studies = userService.getLoginUser().getLikes().stream().map(Like::getStudy).collect(Collectors.toList());
                 if (status != null) {
-                    return studies.stream().filter(study -> study.getStudyStatus().getStatus().equals(status))
+                    studies = studies.stream().filter(study -> study.getStudyStatus().equals(StudyStatus.toStudyStatus(status)))
                             .collect(Collectors.toList());
                 }
-                return studies;
             }
         }
 
-        if (status == null) {
-            return studyUsers.stream().map(StudyUser::getStudy).collect(Collectors.toList());
+        if (tab == null || !tab.equals("likes")) {
+            if (status == null) {
+                studies = studyUsers.stream().map(StudyUser::getStudy).collect(Collectors.toList());
+            } else {
+                studies = studyUsers.stream().map(StudyUser::getStudy)
+                        .filter(study -> study.getStudyStatus().equals(StudyStatus.toStudyStatus(status)))
+                        .collect(Collectors.toList());
+            }
         }
 
-        return studyUsers.stream().map(StudyUser::getStudy)
-                .filter(study -> study.getStudyStatus().getStatus().equals(status))
-                .collect(Collectors.toList());
+        Pageable pageable = PageRequest.of(page, size);
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), studies.size());
+        return new PageImpl<>(studies.subList(start, end), pageable, studies.size());
     }
 
     public void checkLikes(long studyId) {
@@ -241,52 +251,67 @@ public class StudyService {
     }
 
     /*
-    * field : 백엔드, 프론트엔드, 디자인, 기타
+    * field : backend, frontend, design, plan, other
     * stack : 기술스택 중 택 1
     * sort : 최신순(latest), 좋아요순(like), 마감기한순(deadline), 오래된순(old), 조회수순(views)
-    * area : 오프라인일 때 지역
-    * status : RECRUITING("모집중"), ONGOING("진행중"), END("종료")
+    * area : online, seoul, busan, keongkido, keonsangdo, jeonrado, kangwondo, jeju
+    * status : 모집중(recruiting), 진행중(ongoing), 종료(end)
     * */
-    public Page<Study> findStudies(int page, int size, String field, String stack, String sort, String area, Study.StudyStatus status) {
-        List<Study> optionStudies = getOptionStudies(sort);
+    public Page<Study> findStudies(int page, int size, List<String> field, String stack, String sort, String area, String status, String search) {
+
+        List<Study> studies = search == null ? studyRepository.findAll() : studyRepository.findAllByTitleContaining(search);
+
         if (field != null) {
-            optionStudies = optionStudies
-                    .stream()
-                    .filter(study -> study.getActivity().equals(field))
-                    .collect(Collectors.toList());
+            List<Study> finalStudies = studies;
+            List<Study> list = new ArrayList<>();
+
+            field.forEach(studyField -> {
+                finalStudies.forEach(study -> {
+                    if (study.getActivity().contains(Field.toField(studyField))) {
+                        list.add(study);
+                    }
+                });
+            });
+            studies = list.stream().distinct().collect(Collectors.toList());
         }
         if (stack != null) {
             List<Study> list = new ArrayList<>();
-            optionStudies.forEach(study -> study.getStudyStacks()
+            studies.forEach(study -> study.getStudyStacks()
                     .forEach(ss -> {
                         if (ss.getStack().getStackName().equals(stack)) {
                             list.add(study);
                         }
                     }));
-            optionStudies = list;
+            studies = list;
         }
         if (area != null) {
-            optionStudies = optionStudies
-                    .stream()
-                    .filter(study -> !study.isOnline() && study.getPlace().contains(area))
+            Area findArea = Area.toArea(area);
+            studies = studies.stream()
+                    .filter(study -> {
+                        if (!findArea.equals(Area.ONLINE)) {
+                            return !study.isOnline() && study.getPlace().contains(findArea.getArea());
+                        } else {
+                            return study.isOnline();
+                        }
+                    })
                     .collect(Collectors.toList());
         }
         if (status != null) {
-            optionStudies = optionStudies
-                    .stream()
-                    .filter(study -> study.getStudyStatus().equals(status))
+            studies = studies.stream()
+                    .filter(study -> study.getStudyStatus().equals(StudyStatus.toStudyStatus(status)))
                     .collect(Collectors.toList());
         }
 
+        studies = getOptionStudies(studies, sort);
+
         Pageable pageable = PageRequest.of(page, size);
         int start = (int) pageable.getOffset();
-        int end = Math.min((start + pageable.getPageSize()), optionStudies.size());
-        return new PageImpl<>(optionStudies.subList(start, end), pageable, optionStudies.size());
+        int end = Math.min((start + pageable.getPageSize()), studies.size());
+        return new PageImpl<>(studies.subList(start, end), pageable, studies.size());
     }
 
     //sort 없을 경우 최신순
-    private List<Study> getOptionStudies(String sort) {
-        List<Study> studies = studyRepository.findAll();
+    private List<Study> getOptionStudies(List<Study> studies, String sort) {
         if (sort == null || sort.equals("latest")) {
             studies.sort(Collections.reverseOrder(Comparator.comparing(Study::getStudyId)));
         } else if (sort.equals("likes")) {
@@ -305,9 +330,9 @@ public class StudyService {
         }
 
         return studies.stream()
-                .filter(study -> study.getStudyStatus().equals(Study.StudyStatus.RECRUITING)
-                        || study.getStudyStatus().equals(Study.StudyStatus.ONGOING)
-                        || study.getStudyStatus().equals(Study.StudyStatus.END))
+                .filter(study -> study.getStudyStatus().equals(StudyStatus.RECRUITING)
+                        || study.getStudyStatus().equals(StudyStatus.ONGOING)
+                        || study.getStudyStatus().equals(StudyStatus.END))
                 .collect(Collectors.toList());
     }
 
@@ -330,20 +355,20 @@ public class StudyService {
     public void changeStudyStatus() {
         log.info("시스템: 스터디 상태 업데이트 완료");
         //모집중 -> 진행중
-        List<Study> recruitingStudies = studyRepository.findAllByStudyStatus(Study.StudyStatus.RECRUITING);
+        List<Study> recruitingStudies = studyRepository.findAllByStudyStatus(StudyStatus.RECRUITING);
         LocalDate today = LocalDate.now();
         recruitingStudies.forEach(study -> {
             if (study.getStartDate().equals(today.toString())) {
-                study.setStudyStatus(Study.StudyStatus.ONGOING);
+                study.setStudyStatus(StudyStatus.ONGOING);
                 studyRepository.save(study);
             }
         });
         //진행중 -> 종료
-        List<Study> proceedingStudies = studyRepository.findAllByStudyStatus(Study.StudyStatus.ONGOING);
+        List<Study> proceedingStudies = studyRepository.findAllByStudyStatus(StudyStatus.ONGOING);
         proceedingStudies.forEach(study -> {
             LocalDate endDate = LocalDate.parse(study.getEndDate()).plusDays(1);
             if (endDate.isEqual(today)) {
-                study.setStudyStatus(Study.StudyStatus.END);
+                study.setStudyStatus(StudyStatus.END);
                 studyRepository.save(study);
             }
         });
@@ -392,7 +417,7 @@ public class StudyService {
         StudyUser studyUser = new StudyUser();
         studyUser.setStudy(study);
         studyUser.setUser(user);
-        studyUser.setApprovalStatus(StudyUser.ApprovalStatus.WAITING);
+        studyUser.setApprovalStatus(ApprovalStatus.WAITING);
         study.addStudyUser(studyUser);
         studyRepository.save(study);
     }
@@ -402,7 +427,7 @@ public class StudyService {
         Study study = existStudy(studyId);
         //완료, 폐쇄, 모집전 상태면 불가
         checkBeforeRecruitmentAndClosedStudy(study);
-        if (study.getStudyStatus() == Study.StudyStatus.END) {
+        if (study.getStudyStatus() == StudyStatus.END) {
             throw new BusinessLogicException(ExceptionCode.ACCESS_FORBIDDEN);
         }
 
@@ -419,13 +444,18 @@ public class StudyService {
 
 
     //admin - 참가신청자 조회
-    //status : 승인, 대기중, 거절
+    //status : approval, waiting, reject
     public Page<User> getStudyUser(long studyId, String status, int page, int size) {
         Study study = existStudy(studyId);
         accessResource(study);
         List<User> users = study.getStudyUsers().stream()
-                .filter(studyUser -> !studyUser.isAdmin())
-                .filter(studyUser -> studyUser.getApprovalStatus().getStatus().equals(status))
+                .filter(studyUser -> {
+                    if (status == null) {
+                        return !studyUser.isAdmin();
+                    } else {
+                        return !studyUser.isAdmin() && studyUser.getApprovalStatus().equals(ApprovalStatus.toApprovalStatus(status));
+                    }
+                })
                 .map(StudyUser::getUser).collect(Collectors.toList());
 
         Pageable pageable = PageRequest.of(page, size);
@@ -454,17 +484,17 @@ public class StudyService {
         }
 
         //스터디 참여신청 승인/거절
-        if (studyUser.getApprovalStatus() == StudyUser.ApprovalStatus.WAITING
+        if (studyUser.getApprovalStatus() == ApprovalStatus.WAITING
                 && (assign.equals("approval") || assign.equals("reject"))) {
             if (assign.equals("approval")) {
-                studyUser.setApprovalStatus(StudyUser.ApprovalStatus.APPROVAL);
-            } else studyUser.setApprovalStatus(StudyUser.ApprovalStatus.REJECT);
+                studyUser.setApprovalStatus(ApprovalStatus.APPROVAL);
+            } else studyUser.setApprovalStatus(ApprovalStatus.REJECT);
         }
         //스터디원 추방/방장권한위임
-        else if (studyUser.getApprovalStatus() == StudyUser.ApprovalStatus.APPROVAL
+        else if (studyUser.getApprovalStatus() == ApprovalStatus.APPROVAL
                 && (assign.equals("expulsion") || assign.equals("delegation"))) {
             if (assign.equals("expulsion")) {
-                studyUser.setApprovalStatus(StudyUser.ApprovalStatus.REJECT);
+                studyUser.setApprovalStatus(ApprovalStatus.REJECT);
             } else {
                 originalAdmin.setAdmin(false);
                 studyUser.setAdmin(true);
@@ -481,35 +511,35 @@ public class StudyService {
         User user = userService.getLoginUser();
         Optional<StudyUser> optionalStudyUser = studyUserRepository.findByStudyAndUser(study, user);
         StudyUser studyUser = optionalStudyUser.orElseThrow(() -> new BusinessLogicException(ExceptionCode.ACCESS_FORBIDDEN));
-        if (studyUser.getApprovalStatus() != StudyUser.ApprovalStatus.APPROVAL) {
+        if (studyUser.getApprovalStatus() != ApprovalStatus.APPROVAL) {
             throw new BusinessLogicException(ExceptionCode.ACCESS_FORBIDDEN);
         }
     }
 
     //모집중, 진행중인 스터디만 허용
     public void checkRecruitingAndOngoingStudy(Study study) {
-        if (study.getStudyStatus() != Study.StudyStatus.RECRUITING && study.getStudyStatus() != Study.StudyStatus.ONGOING) {
+        if (study.getStudyStatus() != StudyStatus.RECRUITING && study.getStudyStatus() != StudyStatus.ONGOING) {
             throw new BusinessLogicException(ExceptionCode.STUDY_NOT_RECRUITING);
         }
     }
 
     private void checkClosedStudy(Study study) {
-        if (study.getStudyStatus() == Study.StudyStatus.CLOSED) {
+        if (study.getStudyStatus() == StudyStatus.CLOSED) {
             throw new BusinessLogicException(ExceptionCode.ACCESS_FORBIDDEN);
         }
     }
 
     private void checkClosedAndEndStudy(Study study) {
-        Study.StudyStatus studyStatus = study.getStudyStatus();
-        if (studyStatus == Study.StudyStatus.CLOSED || studyStatus == Study.StudyStatus.END) {
+        StudyStatus studyStatus = study.getStudyStatus();
+        if (studyStatus == StudyStatus.CLOSED || studyStatus == StudyStatus.END) {
             throw new BusinessLogicException(ExceptionCode.ACCESS_FORBIDDEN);
         }
     }
 
     private void checkBeforeRecruitmentAndClosedStudy(Study study) {
-        Study.StudyStatus studyStatus = study.getStudyStatus();
-        if (studyStatus == Study.StudyStatus.CLOSED ||
-            studyStatus == Study.StudyStatus.BEFORE_RECRUITMENT) {
+        StudyStatus studyStatus = study.getStudyStatus();
+        if (studyStatus == StudyStatus.CLOSED ||
+            studyStatus == StudyStatus.BEFORE_RECRUITMENT) {
             throw new BusinessLogicException(ExceptionCode.ACCESS_FORBIDDEN);
         }
     }

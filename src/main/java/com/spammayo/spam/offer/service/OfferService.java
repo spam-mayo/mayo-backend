@@ -4,6 +4,7 @@ import com.spammayo.spam.exception.BusinessLogicException;
 import com.spammayo.spam.exception.ExceptionCode;
 import com.spammayo.spam.offer.entity.Offer;
 import com.spammayo.spam.offer.repository.OfferRepository;
+import com.spammayo.spam.status.StudyStatus;
 import com.spammayo.spam.study.entity.Study;
 import com.spammayo.spam.study.repository.StudyRepository;
 import com.spammayo.spam.study.service.StudyService;
@@ -24,7 +25,7 @@ public class OfferService {
 
     public Offer createOffer(Offer offer, long studyId) {
         Study study = studyService.findStudy(studyId);
-        Study.StudyStatus studyStatus = study.getStudyStatus();
+        StudyStatus studyStatus = study.getStudyStatus();
 
         //구인글은 1개만 허용
         if (study.getOffer() != null) {
@@ -33,13 +34,13 @@ public class OfferService {
         studyService.accessResource(study);
 
         //종료, 폐쇄된 스터디는 구인글 작성 불가
-        if (studyStatus == Study.StudyStatus.CLOSED || studyStatus == Study.StudyStatus.END) {
+        if (studyStatus == StudyStatus.CLOSED || studyStatus == StudyStatus.END) {
             throw new BusinessLogicException(ExceptionCode.INVALID_STUDY_STATUS);
         }
 
         //상태 - 진행중이 아니면 모집중으로 설정
-        if (studyStatus != Study.StudyStatus.ONGOING) {
-            study.setStudyStatus(Study.StudyStatus.RECRUITING);
+        if (studyStatus != StudyStatus.ONGOING) {
+            study.setStudyStatus(StudyStatus.RECRUITING);
         }
 
         offer.setStudy(study);
@@ -71,7 +72,7 @@ public class OfferService {
         studyService.checkRecruitingAndOngoingStudy(findStudy);
 
         studyService.accessResource(findStudy);
-        findStudy.setStudyStatus(Study.StudyStatus.BEFORE_RECRUITMENT);
+        findStudy.setStudyStatus(StudyStatus.BEFORE_RECRUITMENT);
         studyRepository.save(findStudy);
         offerRepository.delete(offer);
     }

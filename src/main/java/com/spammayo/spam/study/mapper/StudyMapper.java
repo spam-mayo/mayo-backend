@@ -35,9 +35,9 @@ public interface StudyMapper {
         study.setPersonnel( postDto.getPersonnel() );
 
         //장소없음 check시
-        if (postDto.isOnline()) {
-            study.setOnline(true);
-        } else {
+        study.setOnline(postDto.isOnline());
+
+        if (!postDto.isOnline()) {
             study.setPlace( postDto.getPlace() );
             study.setLatitude( postDto.getLatitude() );
             study.setLongitude( postDto.getLongitude() );
@@ -47,9 +47,7 @@ public interface StudyMapper {
         study.setPeriod( postDto.getPeriod() );
         study.setStudyStatus(StudyStatus.BEFORE_RECRUITMENT);
 
-        List<StackDto> studyStacks = postDto.getStudyStacks();
-
-        settingStudyStack(study, studyStacks);
+        settingStudyStack(study, postDto.getStudyStacks());
         return study;
     }
 
@@ -66,25 +64,22 @@ public interface StudyMapper {
         study.setEndDate(patchDto.getEndDate());
         study.setPersonnel(patchDto.getPersonnel());
 
-        //장소없음 check시
+        study.setOnline(patchDto.isOnline());
+
         if (patchDto.isOnline()) {
-            study.setOnline(true);
             study.setPlace(null);
             study.setLongitude(null);
             study.setLatitude(null);
         } else {
-            study.setOnline(false);
-            study.setPlace( patchDto.getPlace() );
-            study.setLongitude( patchDto.getLongitude() );
-            study.setLatitude( patchDto.getLatitude() );
+            study.setPlace(patchDto.getPlace());
+            study.setLongitude(patchDto.getLongitude());
+            study.setLatitude(patchDto.getLatitude());
         }
 
-        study.setActivity( patchDto.getActivity() );
-        study.setPeriod( patchDto.getPeriod() );
+        study.setActivity(patchDto.getActivity());
+        study.setPeriod(patchDto.getPeriod());
 
-        List<StackDto> studyStacks = patchDto.getStudyStacks();
-
-        settingStudyStack(study, studyStacks);
+        settingStudyStack(study, patchDto.getStudyStacks());
         return study;
     }
 

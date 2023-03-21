@@ -3,10 +3,7 @@ package com.spammayo.spam.study.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.spammayo.spam.stack.dto.StackDto;
 import com.spammayo.spam.status.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.validation.constraints.NotBlank;
 import java.time.LocalDate;
@@ -81,9 +78,10 @@ public class StudyDto {
         private Long studyId;
     }
 
+    @Builder
     @NoArgsConstructor
-    @Getter
-    @Setter
+    @AllArgsConstructor
+    @Getter @Setter
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class ResponseDto {
         private Long studyId;
@@ -122,6 +120,8 @@ public class StudyDto {
         }
     }
 
+    @Builder
+    @AllArgsConstructor
     @NoArgsConstructor
     @Getter @Setter
     public static class ListResponseDto {

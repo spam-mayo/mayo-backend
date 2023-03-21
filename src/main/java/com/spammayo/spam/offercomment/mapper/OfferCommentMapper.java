@@ -49,40 +49,29 @@ public interface OfferCommentMapper {
                 .build();
     }
 
-    default OfferCommentDto.AllResponseDto commentsToCommentAllResponseDto(OfferComment comment,
-                                                                           OfferReplyRepository offerReplyRepository) {
+    default List<OfferCommentDto.AllResponseDto> commentsToCommentAllResponseDto(List<OfferComment> comment,
+                                                                                 OfferReplyRepository offerReplyRepository) {
 
-        return OfferCommentDto.AllResponseDto.builder()
-                .userName(comment.getUser().getUserName())
-                .profileUrl(comment.getUser().getProfileUrl())
-                .createdAt(comment.getCreatedAt())
-                .offerCommentId(comment.getOfferCommentId())
-                .comment(comment.getComment())
-                .secret(comment.getSecret())
-                .replies(offerRepliesToOfferReplyResponseDto(offerReplyRepository.findAllByOfferComment_OfferCommentId(comment.getOfferCommentId())))
-                .build();
+        return comment.stream()
+                .map(offerComment -> OfferCommentDto.AllResponseDto.builder()
+                        .userName(offerComment.getUser().getUserName())
+                        .profileUrl(offerComment.getUser().getProfileUrl())
+                        .createdAt(offerComment.getCreatedAt())
+                        .offerCommentId(offerComment.getOfferCommentId())
+                        .comment(offerComment.getComment())
+                        .secret(offerComment.getSecret())
+                        .replies(offerRepliesToOfferReplyResponseDto(offerReplyRepository.findAllByOfferComment_OfferCommentId(offerComment.getOfferCommentId())))
+                        .build())
+                .collect(Collectors.toList());
     }
-//    default List<OfferCommentDto.AllResponseDto> commentsToCommentResponseDto(List<OfferComment> comments,
-//                                                                              OfferReplyRepository offerReplyRepository) {
-//
-//        return comments.stream()
-//                .map(comment -> OfferCommentDto.AllResponseDto.builder()
-//                        .userName(comment.getUser().getUserName())
-//                        .profileUrl(comment.getUser().getProfileUrl())
-//                        .createdAt(comment.getCreatedAt())
-//                        .offerCommentId(comment.getOfferCommentId())
-//                        .comment(comment.getComment())
-//                        .secret(comment.getSecret())
-//                        .replies(offerRepliesToOfferReplyResponseDto(offerReplyRepository.findAllByOfferComment_OfferCommentId(comment.getOfferCommentId())))
-//                        .build())
-//                .collect(Collectors.toList());
-//    }
 
     default List<OfferReplyDto.ResponseDto> offerRepliesToOfferReplyResponseDto(List<OfferReply> offerReplies) {
 
         return offerReplies.stream()
                 .map(reply -> OfferReplyDto.ResponseDto.builder()
-                        .replyId(reply.getReplyId())
+                        .userName(reply.getUser().getUserName())
+                        .profileUrl(reply.getUser().getProfileUrl())
+                        .createdAt(reply.getCreatedAt())
                         .offerReply(reply.getOfferReply())
                         .secret(reply.getSecret())
                         .build())

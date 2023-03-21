@@ -44,12 +44,11 @@ public class OfferCommentDto {
     @AllArgsConstructor
     public static class AllResponseDto {
         private Long offerCommentId;
-        private Long userId;
         private String userName;
         private String profileUrl;
         private String comment;
         private Boolean secret;
-        private List<OfferReplyDto.ResponseDto> replies;
         private LocalDateTime createdAt;
+        private List<OfferReplyDto.ResponseDto> replies;
     }
 }

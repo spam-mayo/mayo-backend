@@ -69,15 +69,11 @@ public class OfferCommentService {
     }
 
     @Transactional(readOnly = true)
-    public ResponseEntity findAll(OfferComment offerComment) {
+    public ResponseEntity findAll(List<OfferComment> offerComment) {
 
-        OfferCommentDto.AllResponseDto response = offerCommentMapper.commentsToCommentAllResponseDto(offerComment, offerReplyRepository);
+        List<OfferCommentDto.AllResponseDto> response = offerCommentMapper.commentsToCommentAllResponseDto(offerComment, offerReplyRepository);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    public List<OfferComment> findComments() {
-        return offerCommentRepository.findAll();
     }
 
     public void deleteComment(Long offerCommentId, Long studyUserId) {

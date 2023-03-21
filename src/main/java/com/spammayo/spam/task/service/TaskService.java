@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 @Service
@@ -23,6 +24,14 @@ public class TaskService {
     public Task createTask(Task task, long studyId) {
         Study study = studyService.existStudy(studyId);
         studyService.verifiedCrew(study);
+
+        LocalDate start = LocalDate.parse(study.getStartDate());
+        LocalDate end = LocalDate.parse(study.getEndDate());
+        LocalDate taskDate = LocalDate.parse(task.getTaskDate());
+
+        if (taskDate.isBefore(start) || taskDate.isAfter(end)) {
+            throw new BusinessLogicException(ExceptionCode.ACCESS_FORBIDDEN);
+        }
         verifiedTask(task.getTaskDate(), studyId);
         task.setStudy(study);
         return taskRepository.save(task);

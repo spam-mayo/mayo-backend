@@ -1,10 +1,12 @@
 package com.spammayo.spam.offercomment.controller;
 
+import com.spammayo.spam.offer.entity.Offer;
+import com.spammayo.spam.offer.service.OfferService;
 import com.spammayo.spam.offercomment.dto.OfferCommentDto;
 import com.spammayo.spam.offercomment.entity.OfferComment;
 import com.spammayo.spam.offercomment.mapper.OfferCommentMapper;
+import com.spammayo.spam.offercomment.repository.OfferCommentRepository;
 import com.spammayo.spam.offercomment.service.OfferCommentService;
-import com.spammayo.spam.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +14,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import java.util.List;
 
@@ -21,8 +24,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OfferCommentController {
 
+    private final OfferService offerService;
     private final OfferCommentService offerCommentService;
     private final OfferCommentMapper offerCommentMapper;
+    private final OfferCommentRepository offerCommentRepository;
 
     @PostMapping("/offer/{offerId}")
     public ResponseEntity postComment(@PathVariable("offerId") @Positive Long offerId,
@@ -56,18 +61,21 @@ public class OfferCommentController {
         return new ResponseEntity<>(offerCommentMapper.commentToCommentResponseDto(offerComment), HttpStatus.OK);
     }
 
-    @GetMapping
-    public ResponseEntity getComments() {
+    @GetMapping("/study/{studyId}")
+    public ResponseEntity getComments(@PathVariable("studyId") @Positive Long studyId) {
 
-        List<OfferComment> offerComments = offerCommentService.findComments();
+        Offer offer = offerService.findOffer(studyId);
 
-        return new ResponseEntity<>(offerCommentMapper.commentsToCommentResponseDto(offerComments), HttpStatus.OK);
+        List<OfferComment> offerComment = offerCommentRepository.findByOffer(offer);
+
+        return offerCommentService.findAll(offerComment);
     }
 
     @DeleteMapping("/{offerCommentId}")
-    public ResponseEntity deleteComment(@PathVariable("offerCommentId") @Positive Long offerCommentId) {
+    public ResponseEntity deleteComment(@PathVariable("offerCommentId") @Positive Long offerCommentId,
+                                        @RequestParam @NotNull Long studyUserId) {
 
-        offerCommentService.deleteComment(offerCommentId);
+        offerCommentService.deleteComment(offerCommentId, studyUserId);
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

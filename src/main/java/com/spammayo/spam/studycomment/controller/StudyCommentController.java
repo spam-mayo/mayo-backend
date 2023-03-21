@@ -1,6 +1,5 @@
 package com.spammayo.spam.studycomment.controller;
 
-import com.spammayo.spam.offercomment.entity.OfferComment;
 import com.spammayo.spam.studycomment.dto.StudyCommentDto;
 import com.spammayo.spam.studycomment.entity.StudyComment;
 import com.spammayo.spam.studycomment.mapper.StudyCommentMapper;
@@ -12,6 +11,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import java.util.List;
 
@@ -57,18 +58,20 @@ public class StudyCommentController {
         return new ResponseEntity<>(studyCommentMapper.studyCommentToStudyCommentResponseDto(studyComment), HttpStatus.OK);
     }
 
-    @GetMapping
-    public ResponseEntity getComments() {
+    @GetMapping("/study/{studyId}")
+    public ResponseEntity getComments(@PathVariable("studyId") @Positive Long studyId,
+                                      @RequestParam @NotBlank String taskDate) {
 
-        List<StudyComment> studyComments = studyCommentService.findComments();
+        List<StudyComment> studyComments = studyCommentService.findComments(studyId, taskDate);
 
         return new ResponseEntity<>(studyCommentMapper.studyCommentsToStudyCommentResponseDto(studyComments), HttpStatus.OK);
     }
 
     @DeleteMapping("/{studyCommentId}")
-    public ResponseEntity deleteComment(@PathVariable("studyCommentId") @Positive Long studyCommentId) {
+    public ResponseEntity deleteComment(@PathVariable("studyCommentId") @Positive Long studyCommentId,
+                                        @RequestParam @NotNull Long studyUserId) {
 
-        studyCommentService.deleteComment(studyCommentId);
+        studyCommentService.deleteComment(studyCommentId, studyUserId);
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

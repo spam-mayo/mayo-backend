@@ -8,9 +8,7 @@ import com.spammayo.spam.status.Period;
 import com.spammayo.spam.status.Personnel;
 import com.spammayo.spam.status.StudyStatus;
 import com.spammayo.spam.task.entity.Task;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.ArrayList;

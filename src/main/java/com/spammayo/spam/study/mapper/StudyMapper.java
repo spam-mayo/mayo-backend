@@ -2,6 +2,7 @@ package com.spammayo.spam.study.mapper;
 
 import com.spammayo.spam.stack.dto.StackDto;
 import com.spammayo.spam.stack.entity.Stack;
+import com.spammayo.spam.stack.mapper.StackMapper;
 import com.spammayo.spam.status.StudyStatus;
 import com.spammayo.spam.study.dto.StudyDto;
 import com.spammayo.spam.study.entity.Study;
@@ -9,14 +10,16 @@ import com.spammayo.spam.study.entity.StudyStack;
 import com.spammayo.spam.study.entity.StudyUser;
 import com.spammayo.spam.user.entity.User;
 import org.mapstruct.Mapper;
+import org.mapstruct.factory.Mappers;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Mapper(componentModel = "spring")
 public interface StudyMapper {
+
+    StackMapper stackMapper = Mappers.getMapper(StackMapper.class);
 
     default Study inputDtoToStudy(StudyDto.InputDto postDto) {
         if ( postDto == null ) {
@@ -32,9 +35,9 @@ public interface StudyMapper {
         study.setPersonnel( postDto.getPersonnel() );
 
         //장소없음 check시
-        if (postDto.isOnline()) {
-            study.setOnline(true);
-        } else {
+        study.setOnline(postDto.isOnline());
+
+        if (!postDto.isOnline()) {
             study.setPlace( postDto.getPlace() );
             study.setLatitude( postDto.getLatitude() );
             study.setLongitude( postDto.getLongitude() );
@@ -44,17 +47,7 @@ public interface StudyMapper {
         study.setPeriod( postDto.getPeriod() );
         study.setStudyStatus(StudyStatus.BEFORE_RECRUITMENT);
 
-        List<StackDto> studyStacks = postDto.getStudyStacks();
-
-        if (studyStacks != null) {
-            studyStacks.forEach(stacks -> {
-                Stack stack = new Stack();
-                stack.setStackId(stacks.getStackId());
-                StudyStack studyStack = new StudyStack();
-                studyStack.setStack(stack);
-                study.addStudyStack(studyStack);
-            });
-        }
+        settingStudyStack(study, postDto.getStudyStacks());
         return study;
     }
 
@@ -66,29 +59,31 @@ public interface StudyMapper {
         Study study = new Study();
 
         study.setStudyId(patchDto.getStudyId());
-        study.setStudyName( patchDto.getStudyName() );
-        study.setStartDate(patchDto.getStartDate() );
-        study.setEndDate( patchDto.getEndDate() );
-        study.setPersonnel( patchDto.getPersonnel() );
+        study.setStudyName(patchDto.getStudyName());
+        study.setStartDate(patchDto.getStartDate());
+        study.setEndDate(patchDto.getEndDate());
+        study.setPersonnel(patchDto.getPersonnel());
 
-        //장소없음 check시
+        study.setOnline(patchDto.isOnline());
+
         if (patchDto.isOnline()) {
-            study.setOnline(true);
             study.setPlace(null);
             study.setLongitude(null);
             study.setLatitude(null);
         } else {
-            study.setOnline(false);
-            study.setPlace( patchDto.getPlace() );
-            study.setLongitude( patchDto.getLongitude() );
-            study.setLatitude( patchDto.getLatitude() );
+            study.setPlace(patchDto.getPlace());
+            study.setLongitude(patchDto.getLongitude());
+            study.setLatitude(patchDto.getLatitude());
         }
 
-        study.setActivity( patchDto.getActivity() );
-        study.setPeriod( patchDto.getPeriod() );
+        study.setActivity(patchDto.getActivity());
+        study.setPeriod(patchDto.getPeriod());
 
-        List<StackDto> studyStacks = patchDto.getStudyStacks();
+        settingStudyStack(study, patchDto.getStudyStacks());
+        return study;
+    }
 
+    private void settingStudyStack(Study study, List<StackDto> studyStacks) {
         if (studyStacks != null) {
             studyStacks.forEach(stacks -> {
                 Stack stack = new Stack();
@@ -98,7 +93,6 @@ public interface StudyMapper {
                 study.addStudyStack(studyStack);
             });
         }
-        return study;
     }
 
     StudyDto.SimpleResponseDto studyToSimpleResponseDto(Study study);
@@ -108,40 +102,28 @@ public interface StudyMapper {
             return null;
         }
 
-        StudyDto.ResponseDto responseDto = new StudyDto.ResponseDto();
-        List<StackDto> stackList = new ArrayList<>();
-
-        responseDto.setStudyId( study.getStudyId() );
-        responseDto.setStudyName( study.getStudyName() );
-        responseDto.setTitle( study.getTitle() );
-        responseDto.setStartDate( study.getStartDate() );
-        responseDto.setEndDate( study.getEndDate() );
-        responseDto.setPersonnel( study.getPersonnel() );
-        responseDto.setPlace( study.getPlace() );
-        responseDto.setLatitude( study.getLatitude() );
-        responseDto.setLongitude( study.getLongitude() );
-        responseDto.setActivity( study.getActivity() );
-        responseDto.setPeriod( study.getPeriod() );
-        responseDto.setStudyStatus( study.getStudyStatus() );
-        responseDto.setOnline( study.isOnline() );
-        responseDto.setCreatedAt( study.getCreatedAt().toLocalDate() );
-
-        StudyUser studyUser = study.getStudyUsers().stream().filter(StudyUser::isAdmin).findFirst().orElseThrow();
-        User admin = studyUser.getUser();
+        User admin = study.getStudyUsers().stream().filter(StudyUser::isAdmin).findFirst().orElseThrow().getUser();
         StudyDto.OwnerDto ownerDto = new StudyDto.OwnerDto(admin.getUserId(), admin.getUserName(), admin.getEmail(), admin.getField(), admin.getProfileUrl());
-        responseDto.setOwner(ownerDto);
 
-        Optional.ofNullable(study.getStudyStacks())
-                .ifPresent(ss -> ss.forEach(userStack -> {
-                    Stack stack = userStack.getStack();
-                    stackList.add(new StackDto(stack.getStackId(), stack.getStackName()));
-                }));
-        responseDto.setStack(stackList);
-
-        boolean check = isCheck(study);
-        responseDto.setCheckLikes(check);
-
-        return responseDto;
+        return StudyDto.ResponseDto.builder()
+                .studyId(study.getStudyId())
+                .studyName(study.getStudyName())
+                .title(study.getTitle())
+                .startDate(study.getStartDate())
+                .endDate(study.getEndDate())
+                .personnel(study.getPersonnel())
+                .place(study.getPlace())
+                .latitude(study.getLatitude())
+                .longitude(study.getLongitude())
+                .activity(study.getActivity())
+                .period(study.getPeriod())
+                .studyStatus(study.getStudyStatus())
+                .online(study.isOnline())
+                .createdAt(study.getCreatedAt().toLocalDate())
+                .owner(ownerDto)
+                .stack(stackMapper.toStudyStackDto(study))
+                .checkLikes(isCheck(study))
+                .build();
     }
 
     default List<StudyDto.ListResponseDto> studiesToListResponseDto(List<Study> studies) {
@@ -150,31 +132,24 @@ public interface StudyMapper {
         }
 
         List<StudyDto.ListResponseDto> list = new ArrayList<>(studies.size());
+
         for ( Study study : studies ) {
-            List<StackDto> stackList = new ArrayList<>();
-            StudyDto.ListResponseDto listResponseDto = new StudyDto.ListResponseDto();
 
-            listResponseDto.setStudyId( study.getStudyId() );
-            listResponseDto.setTitle( study.getTitle() );
-            listResponseDto.setStartDate( study.getStartDate() );
-            listResponseDto.setEndDate( study.getEndDate() );
-            listResponseDto.setStudyStatus( study.getStudyStatus() );
-            listResponseDto.setOnline( study.isOnline() );
-            boolean check = isCheck(study);
-            listResponseDto.setCheckLikes(check);
-
-            //작성자
-            StudyUser studyUser = study.getStudyUsers().stream().filter(StudyUser::isAdmin).findFirst().orElseThrow();
-            User admin = studyUser.getUser();
+            User admin = study.getStudyUsers().stream().filter(StudyUser::isAdmin).findFirst().orElseThrow().getUser();
             StudyDto.SimpleOwnerDto ownerDto = new StudyDto.SimpleOwnerDto(admin.getUserId(), admin.getUserName(), admin.getProfileUrl());
-            listResponseDto.setOwner(ownerDto);
 
-            study.getStudyStacks().forEach(ss -> {
-                Stack stack = ss.getStack();
-                StackDto stackDto = new StackDto(stack.getStackId(), stack.getStackName());
-                stackList.add(stackDto);
-            });
-            listResponseDto.setStack(stackList);
+            StudyDto.ListResponseDto listResponseDto = StudyDto.ListResponseDto.builder()
+                    .studyId(study.getStudyId())
+                    .title(study.getTitle())
+                    .startDate(study.getStartDate())
+                    .endDate(study.getEndDate())
+                    .studyStatus(study.getStudyStatus())
+                    .online(study.isOnline())
+                    .checkLikes(isCheck(study))
+                    .owner(ownerDto)
+                    .stack(stackMapper.toStudyStackDto(study))
+                    .build();
+
             list.add(listResponseDto);
         }
 
@@ -192,7 +167,7 @@ public interface StudyMapper {
 
         List<StudyDto.MyPageResponseDto> list = new ArrayList<>(studies.size());
         for ( Study study : studies ) {
-            List<StackDto> stackList = new ArrayList<>();
+
             StudyDto.MyPageResponseDto myPageResponseDto = new StudyDto.MyPageResponseDto();
 
             myPageResponseDto.setStudyId( study.getStudyId() );
@@ -212,19 +187,14 @@ public interface StudyMapper {
                 myPageResponseDto.setApprovalStatus(findStudyUser.getApprovalStatus());
             }
 
-            study.getStudyStacks().forEach(ss -> {
-                Stack stack = ss.getStack();
-                StackDto stackDto = new StackDto(stack.getStackId(), stack.getStackName());
-                stackList.add(stackDto);
-            });
-            myPageResponseDto.setStack(stackList);
+            myPageResponseDto.setStack(stackMapper.toStudyStackDto(study));
             list.add(myPageResponseDto);
         }
 
         return list;
     }
 
-    private static boolean isCheck(Study study) {
+    private boolean isCheck(Study study) {
         String email = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
         return study.getLikes().stream().anyMatch(like -> like.getUser().getEmail().equals(email));
     }

@@ -11,6 +11,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import java.util.List;
 
@@ -65,9 +66,10 @@ public class OfferReplyController {
     }
 
     @DeleteMapping("/{replyId}")
-    public ResponseEntity deleteComment(@PathVariable("replyId") @Positive Long replyId) {
+    public ResponseEntity deleteComment(@PathVariable("replyId") @Positive Long replyId,
+                                        @RequestParam @NotNull Long studyUserId) {
 
-        offerReplyService.deleteReply(replyId);
+        offerReplyService.deleteReply(replyId, studyUserId);
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

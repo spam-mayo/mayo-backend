@@ -3,6 +3,7 @@ package com.spammayo.spam.offerreply.dto;
 import lombok.*;
 
 import javax.validation.constraints.NotBlank;
+import java.time.LocalDateTime;
 
 public class OfferReplyDto {
 
@@ -32,7 +33,9 @@ public class OfferReplyDto {
     @Builder
     @AllArgsConstructor
     public static class ResponseDto {
-        private Long replyId;
+        private String userName;
+        private String profileUrl;
+        private LocalDateTime createdAt;
         private String offerReply;
         private Boolean secret;
     }

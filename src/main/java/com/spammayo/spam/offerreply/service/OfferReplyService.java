@@ -6,6 +6,8 @@ import com.spammayo.spam.offercomment.entity.OfferComment;
 import com.spammayo.spam.offercomment.service.OfferCommentService;
 import com.spammayo.spam.offerreply.entity.OfferReply;
 import com.spammayo.spam.offerreply.repository.OfferReplyRepository;
+import com.spammayo.spam.study.entity.StudyUser;
+import com.spammayo.spam.study.repository.StudyUserRepository;
 import com.spammayo.spam.user.entity.User;
 import com.spammayo.spam.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,7 @@ public class OfferReplyService {
     private final OfferReplyRepository offerReplyRepository;
     private final OfferCommentService offerCommentService;
     private final UserService userService;
+    private final StudyUserRepository studyUserRepository;
 
     public OfferReply createReply(OfferReply offerReply,
                                   Long offerCommentId) {
@@ -59,16 +62,20 @@ public class OfferReplyService {
 
     public List<OfferReply> findReplies() { return offerReplyRepository.findAll(); }
 
-    public void deleteReply(Long replyId) {
+    public void deleteReply(Long replyId, Long studyUserId) {
 
         OfferReply findReply = verifiedReply(replyId);
 
-        if (!findReply.getUser().getEmail().equals(userService.getLoginUser().getEmail())) {
+        StudyUser studyUser = studyUserRepository.findById(studyUserId)
+                .orElseThrow(() -> new BusinessLogicException(ExceptionCode.MEMBER_NOT_FOUND));
+
+        if (!findReply.getUser().getEmail().equals(userService.getLoginUser().getEmail()) && !studyUser.isAdmin()) {
             throw new BusinessLogicException(ExceptionCode.ACCESS_FORBIDDEN);
         }
 
         offerReplyRepository.delete(findReply);
     }
+
     private OfferReply verifiedReply(Long replyId) {
 
         return offerReplyRepository.findById(replyId)

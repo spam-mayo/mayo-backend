@@ -13,7 +13,16 @@ public interface OfferReplyMapper {
 
     OfferReply replyPatchDtoToOfferReply(OfferReplyDto.PatchDto requestBody);
 
-    OfferReplyDto.ResponseDto offerReplyToOfferReplyResponseDto(OfferReply offerReply);
+    default OfferReplyDto.ResponseDto offerReplyToOfferReplyResponseDto(OfferReply offerReply) {
+
+        return OfferReplyDto.ResponseDto.builder()
+                .userName(offerReply.getUser().getUserName())
+                .profileUrl(offerReply.getUser().getProfileUrl())
+                .createdAt(offerReply.getCreatedAt())
+                .offerReply(offerReply.getOfferReply())
+                .secret(offerReply.getSecret())
+                .build();
+    }
 
     List<OfferReplyDto.ResponseDto> offerRepliesToOfferReplyResponseDto(List<OfferReply> offerReplies);
 }

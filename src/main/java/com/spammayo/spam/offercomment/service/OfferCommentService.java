@@ -4,11 +4,18 @@ import com.spammayo.spam.exception.BusinessLogicException;
 import com.spammayo.spam.exception.ExceptionCode;
 import com.spammayo.spam.offer.entity.Offer;
 import com.spammayo.spam.offer.service.OfferService;
+import com.spammayo.spam.offercomment.dto.OfferCommentDto;
 import com.spammayo.spam.offercomment.entity.OfferComment;
+import com.spammayo.spam.offercomment.mapper.OfferCommentMapper;
 import com.spammayo.spam.offercomment.repository.OfferCommentRepository;
+import com.spammayo.spam.offerreply.repository.OfferReplyRepository;
+import com.spammayo.spam.study.entity.StudyUser;
+import com.spammayo.spam.study.repository.StudyUserRepository;
 import com.spammayo.spam.user.entity.User;
 import com.spammayo.spam.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +29,9 @@ public class OfferCommentService {
     private final OfferCommentRepository offerCommentRepository;
     private final UserService userService;
     private final OfferService offerService;
+    private final StudyUserRepository studyUserRepository;
+    private final OfferCommentMapper offerCommentMapper;
+    private final OfferReplyRepository offerReplyRepository;
 
     public OfferComment createComment(OfferComment comment,
                                       Long offerId) {
@@ -41,7 +51,6 @@ public class OfferCommentService {
 
         OfferComment findComment = verifiedComment(offerCommentId);
 
-        // TODO : 스터디 방장 권한 추가
         if (!findComment.getUser().getEmail().equals(userService.getLoginUser().getEmail())) {
             throw new BusinessLogicException(ExceptionCode.ACCESS_FORBIDDEN);
         }
@@ -59,16 +68,22 @@ public class OfferCommentService {
         return verifiedComment(offerCommentId);
     }
 
-    public List<OfferComment> findComments() {
-        return offerCommentRepository.findAll();
+    @Transactional(readOnly = true)
+    public ResponseEntity findAll(List<OfferComment> offerComment) {
+
+        List<OfferCommentDto.AllResponseDto> response = offerCommentMapper.commentsToCommentAllResponseDto(offerComment, offerReplyRepository);
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    public void deleteComment(Long offerCommentId) {
+    public void deleteComment(Long offerCommentId, Long studyUserId) {
 
         OfferComment findComment = verifiedComment(offerCommentId);
 
-        // TODO : 스터디 방장 권한 추가
-        if (!findComment.getUser().getEmail().equals(userService.getLoginUser().getEmail())) {
+        StudyUser studyUser = studyUserRepository.findById(studyUserId)
+                .orElseThrow(() -> new BusinessLogicException(ExceptionCode.MEMBER_NOT_FOUND));
+
+        if (!findComment.getUser().getEmail().equals(userService.getLoginUser().getEmail()) && !studyUser.isAdmin()) {
             throw new BusinessLogicException(ExceptionCode.ACCESS_FORBIDDEN);
         }
 

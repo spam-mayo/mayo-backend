@@ -1,6 +1,9 @@
 package com.spammayo.spam.user.dto;
 
 import com.spammayo.spam.stack.dto.StackDto;
+import com.spammayo.spam.status.ApprovalStatus;
+import com.spammayo.spam.status.Field;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,6 +17,7 @@ import java.util.List;
 public class UserDto {
 
     @NoArgsConstructor
+    @AllArgsConstructor
     @Getter @Setter
     public static class PostDto {
 
@@ -35,6 +39,7 @@ public class UserDto {
 
     @Getter @Setter
     @NoArgsConstructor
+    @AllArgsConstructor
     public static class PatchDto {
         private Long userId;
 
@@ -43,11 +48,12 @@ public class UserDto {
 
         @Pattern(regexp = "(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[!@#$%^&]).{8,16}", message = "비밀번호는 영문, 특수문자, 숫자 포함 8-16자 이내여야 합니다.")
         private String password;
-        private String field;
+        private Field field;
         private List<StackDto> userStacks;
     }
 
     @NoArgsConstructor
+    @AllArgsConstructor
     @Getter @Setter
     public static class SimpleResponseDto {
         private Long userId;
@@ -55,25 +61,40 @@ public class UserDto {
 
     //특정 회원 조회
     @NoArgsConstructor
+    @AllArgsConstructor
     @Getter @Setter
     public static class ResponseDto {
         private Long userId;
         private String userName;
         private String email;
         private String profileUrl;
-        private String field;
+        private Field field;
         private List<StackDto> stack;
+
+        public String getField() {
+            return field.getField();
+        }
     }
 
     //스터디원 목록 조회
     @NoArgsConstructor
+    @AllArgsConstructor
     @Getter @Setter
     public static class ListResponseDto {
         private Long userId;
         private String userName;
         private String profileUrl;
-        private String field;
+        private Field field;
         private String createdAt;
         private String applicationDate;
+        private ApprovalStatus approvalStatus;
+
+        public String getField() {
+            return field.getField();
+        }
+
+        public String getApprovalStatus() {
+            return approvalStatus.getStatus();
+        }
     }
 }

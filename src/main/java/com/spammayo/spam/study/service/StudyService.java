@@ -81,8 +81,8 @@ public class StudyService {
     public Study updateStudy(Study study) {
         Study findStudy = existStudy(study.getStudyId());
         //관리자만 접근 허용
-        accessResource(findStudy);
-        checkClosedAndEndStudy(findStudy);
+        allowedResourceForAdmin(findStudy);
+        forbiddenStudy(findStudy, StudyStatus.CLOSED, StudyStatus.END);
         StudyStatus studyStatus = study.getStudyStatus();
 
         String originalStartDate = findStudy.getStartDate();
@@ -153,7 +153,7 @@ public class StudyService {
 
     public Study findStudy(long studyId) {
         Study findStudy = existStudy(studyId);
-        checkClosedStudy(findStudy);
+        forbiddenStudy(findStudy, StudyStatus.CLOSED);
         StudyStatus studyStatus = findStudy.getStudyStatus();
         //모집전인 상태일 경우 작성자만 조회 가능
         if (studyStatus == StudyStatus.BEFORE_RECRUITMENT) {
@@ -177,7 +177,7 @@ public class StudyService {
     * */
     public void deleteStudy(long studyId) {
         Study study = existStudy(studyId);
-        accessResource(study);
+        allowedResourceForAdmin(study);
 
         long member = study.getStudyUsers()
                 .stream()
@@ -238,7 +238,7 @@ public class StudyService {
     public void checkLikes(long studyId) {
         User user = userService.getLoginUser();
         Study study = existStudy(studyId);
-        checkBeforeRecruitmentAndClosedStudy(study);
+        forbiddenStudy(study, StudyStatus.BEFORE_RECRUITMENT, StudyStatus.CLOSED);
         Optional<Like> optionalLike = user.getLikes().stream().filter(like -> like.getStudy().getStudyId() == studyId).findAny();
 
         if (optionalLike.isPresent()) {
@@ -342,7 +342,7 @@ public class StudyService {
     }
 
     //관리자만 접근 가능
-    public void accessResource(Study study) {
+    public void allowedResourceForAdmin(Study study) {
         StudyUser studyUser = studyUserRepository.findByStudyAndUser(study, userService.getLoginUser())
                 .orElseThrow(() -> new BusinessLogicException(ExceptionCode.UNAUTHORIZED));
 
@@ -377,8 +377,8 @@ public class StudyService {
     //스터디 내부 (notice == null 이면 공지사항 없음)
     public void updateNotice(Study study) {
         Study findStudy = existStudy(study.getStudyId());
-        checkClosedStudy(findStudy);
-        accessResource(findStudy);
+        forbiddenStudy(findStudy, StudyStatus.CLOSED);
+        allowedResourceForAdmin(findStudy);
         if (study.getNoticeTitle() == null) {
             findStudy.setNoticeTitle(null);
             findStudy.setNoticeContent(null);
@@ -391,15 +391,15 @@ public class StudyService {
 
     public Study findNotice(long studyId) {
         Study findStudy = existStudy(studyId);
-        checkClosedStudy(findStudy);
+        forbiddenStudy(findStudy, StudyStatus.CLOSED);
         verifiedCrew(findStudy);
         return findStudy;
     }
 
     public void deleteNotice(long studyId) {
         Study findStudy = existStudy(studyId);
-        checkClosedStudy(findStudy);
-        accessResource(findStudy);
+        forbiddenStudy(findStudy, StudyStatus.CLOSED);
+        allowedResourceForAdmin(findStudy);
         findStudy.setNoticeTitle(null);
         findStudy.setNoticeContent(null);
     }
@@ -407,7 +407,8 @@ public class StudyService {
     //참가 신청
     public void userRequestForStudy(long studyId) {
         Study study = existStudy(studyId);
-        checkRecruitingAndOngoingStudy(study);
+        forbiddenStudy(study, StudyStatus.BEFORE_RECRUITMENT, StudyStatus.END, StudyStatus.CLOSED);
+
         User user = userService.getLoginUser();
         user.getStudyUsers().forEach(studyUser -> {
             if (studyUser.getStudy() == study) {
@@ -425,11 +426,9 @@ public class StudyService {
     //신청 취소
     public void userCancelForStudy(long studyId) {
         Study study = existStudy(studyId);
+
         //완료, 폐쇄, 모집전 상태면 불가
-        checkBeforeRecruitmentAndClosedStudy(study);
-        if (study.getStudyStatus() == StudyStatus.END) {
-            throw new BusinessLogicException(ExceptionCode.ACCESS_FORBIDDEN);
-        }
+        forbiddenStudy(study, StudyStatus.BEFORE_RECRUITMENT, StudyStatus.CLOSED, StudyStatus.END);
 
         StudyUser studyUser = studyUserRepository.findByStudyAndUser(study, userService.getLoginUser())
                 .orElseThrow(() -> new BusinessLogicException(ExceptionCode.ACCESS_FORBIDDEN));
@@ -447,7 +446,7 @@ public class StudyService {
     //status : approval, waiting, reject
     public Page<User> getStudyUser(long studyId, String status, int page, int size) {
         Study study = existStudy(studyId);
-        accessResource(study);
+        allowedResourceForAdmin(study);
         List<User> users = study.getStudyUsers().stream()
                 .filter(studyUser -> {
                     if (status == null) {
@@ -471,8 +470,11 @@ public class StudyService {
     * */
     public void assignStudyUser(long studyId, long userId, String assign) {
         Study study = existStudy(studyId);
-        accessResource(study);
-        checkRecruitingAndOngoingStudy(study);
+
+        //접근 권한 확인
+        allowedResourceForAdmin(study);
+        forbiddenStudy(study, StudyStatus.BEFORE_RECRUITMENT, StudyStatus.END, StudyStatus.CLOSED);
+
         User user = userService.getUser(userId);
         StudyUser studyUser = studyUserRepository.findByStudyAndUser(study, user)
                 .orElseThrow(() -> new BusinessLogicException(ExceptionCode.MEMBER_NOT_FOUND));
@@ -516,31 +518,12 @@ public class StudyService {
         }
     }
 
-    //모집중, 진행중인 스터디만 허용
-    public void checkRecruitingAndOngoingStudy(Study study) {
-        if (study.getStudyStatus() != StudyStatus.RECRUITING && study.getStudyStatus() != StudyStatus.ONGOING) {
-            throw new BusinessLogicException(ExceptionCode.STUDY_NOT_RECRUITING);
+    public void forbiddenStudy(Study study, StudyStatus ... status) {
+        for (StudyStatus studyStatus : status) {
+            if (study.getStudyStatus() == studyStatus) {
+                throw new BusinessLogicException(ExceptionCode.ACCESS_FORBIDDEN);
+            }
         }
     }
 
-    private void checkClosedStudy(Study study) {
-        if (study.getStudyStatus() == StudyStatus.CLOSED) {
-            throw new BusinessLogicException(ExceptionCode.ACCESS_FORBIDDEN);
-        }
-    }
-
-    private void checkClosedAndEndStudy(Study study) {
-        StudyStatus studyStatus = study.getStudyStatus();
-        if (studyStatus == StudyStatus.CLOSED || studyStatus == StudyStatus.END) {
-            throw new BusinessLogicException(ExceptionCode.ACCESS_FORBIDDEN);
-        }
-    }
-
-    private void checkBeforeRecruitmentAndClosedStudy(Study study) {
-        StudyStatus studyStatus = study.getStudyStatus();
-        if (studyStatus == StudyStatus.CLOSED ||
-            studyStatus == StudyStatus.BEFORE_RECRUITMENT) {
-            throw new BusinessLogicException(ExceptionCode.ACCESS_FORBIDDEN);
-        }
-    }
 }

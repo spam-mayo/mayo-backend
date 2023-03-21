@@ -25,21 +25,18 @@ public class OfferService {
 
     public Offer createOffer(Offer offer, long studyId) {
         Study study = studyService.findStudy(studyId);
-        StudyStatus studyStatus = study.getStudyStatus();
 
         //구인글은 1개만 허용
         if (study.getOffer() != null) {
             throw new BusinessLogicException(ExceptionCode.OFFER_EXISTS);
         }
-        studyService.accessResource(study);
+        studyService.allowedResourceForAdmin(study);
 
         //종료, 폐쇄된 스터디는 구인글 작성 불가
-        if (studyStatus == StudyStatus.CLOSED || studyStatus == StudyStatus.END) {
-            throw new BusinessLogicException(ExceptionCode.INVALID_STUDY_STATUS);
-        }
+        studyService.forbiddenStudy(study, StudyStatus.CLOSED, StudyStatus.END);
 
         //상태 - 진행중이 아니면 모집중으로 설정
-        if (studyStatus != StudyStatus.ONGOING) {
+        if (study.getStudyStatus() != StudyStatus.ONGOING) {
             study.setStudyStatus(StudyStatus.RECRUITING);
         }
 
@@ -50,8 +47,10 @@ public class OfferService {
     public Offer updateOffer(Offer offer) {
         Offer findOffer = existOffer(offer.getOfferId());
         Study findStudy = findOffer.getStudy();
-        studyService.accessResource(findStudy);
-        studyService.checkRecruitingAndOngoingStudy(findStudy);
+
+        //접근 권한 확인
+        studyService.allowedResourceForAdmin(findStudy);
+        studyService.forbiddenStudy(findStudy, StudyStatus.BEFORE_RECRUITMENT, StudyStatus.END, StudyStatus.CLOSED);
 
         Optional.ofNullable(offer.getOfferIntro())
                 .ifPresent(findOffer::setOfferIntro);
@@ -69,9 +68,11 @@ public class OfferService {
     public void deleteOffer(long offerId) {
         Offer offer = existOffer(offerId);
         Study findStudy = offer.getStudy();
-        studyService.checkRecruitingAndOngoingStudy(findStudy);
 
-        studyService.accessResource(findStudy);
+        //접근 권한 확인
+        studyService.forbiddenStudy(findStudy, StudyStatus.BEFORE_RECRUITMENT, StudyStatus.END, StudyStatus.CLOSED);
+        studyService.allowedResourceForAdmin(findStudy);
+
         findStudy.setStudyStatus(StudyStatus.BEFORE_RECRUITMENT);
         studyRepository.save(findStudy);
         offerRepository.delete(offer);

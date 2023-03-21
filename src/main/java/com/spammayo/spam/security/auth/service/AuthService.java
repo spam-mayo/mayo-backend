@@ -65,7 +65,7 @@ public class AuthService {
         } catch (SignatureException | MalformedJwtException | DecodingException e) {
             throw new BusinessLogicException(ExceptionCode.INVALID_VALUES);
         } catch (ExpiredJwtException e) {
-            throw new BusinessLogicException(ExceptionCode.UNAUTHORIZED);
+            throw new BusinessLogicException(ExceptionCode.EXPIRED_JWT_TOKEN);
         }
 
         Jws<Claims> claims = jwtTokenizer.getClaims(refreshToken, encodeBase64SecretKey);

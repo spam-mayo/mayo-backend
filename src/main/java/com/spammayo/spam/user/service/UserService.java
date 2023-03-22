@@ -33,10 +33,10 @@ public class UserService {
         verifiedUser(user.getEmail());
 
         //이메일 인증 여부 확인
-//        Object authEmail = redisUtils.get("join_" + user.getEmail());
-//        if (authEmail == null || !authEmail.toString().equals("confirm")) {
-//            throw new BusinessLogicException(ExceptionCode.EMAIL_AUTH_REQUIRED);
-//        }
+        Object authEmail = redisUtils.get("join_" + user.getEmail());
+        if (authEmail == null || !authEmail.toString().equals("confirm")) {
+            throw new BusinessLogicException(ExceptionCode.EMAIL_AUTH_REQUIRED);
+        }
 
         List<String> roles = authorityUtils.createRoles(user.getEmail());
         user.setRoles(roles);
@@ -97,6 +97,10 @@ public class UserService {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new BusinessLogicException(ExceptionCode.MEMBER_NOT_FOUND));
+    }
+
+    public String getLoginUserEmail() {
+        return SecurityContextHolder.getContext().getAuthentication().getName();
     }
 
     //본인만 접근 허용

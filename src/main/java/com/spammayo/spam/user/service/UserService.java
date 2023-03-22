@@ -91,7 +91,6 @@ public class UserService {
             if (studyUser.isAdmin()) {
                 studyRepository.delete(studyUser.getStudy());
             }
-//            else studyUserRepository.delete(studyUser);
         });
 
         userRepository.delete(findUser);

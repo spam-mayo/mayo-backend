@@ -39,7 +39,7 @@ public class StudyDto {
         private Double longitude;
         private List<Field> activity;
         private Period period;
-        private List<StackDto> studyStacks;
+        private List<String> studyStacks;
     }
 
     @NoArgsConstructor
@@ -67,7 +67,7 @@ public class StudyDto {
         private Double longitude;
         private List<Field> activity;
         private Period period;
-        private List<StackDto> studyStacks;
+        private List<String> studyStacks;
 
     }
 

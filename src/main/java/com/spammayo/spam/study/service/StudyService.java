@@ -13,6 +13,7 @@ import com.spammayo.spam.study.entity.Study;
 import com.spammayo.spam.study.entity.StudyUser;
 import com.spammayo.spam.study.repository.StudyRepository;
 import com.spammayo.spam.study.repository.StudyUserRepository;
+import com.spammayo.spam.task.repository.TaskRepository;
 import com.spammayo.spam.user.entity.User;
 import com.spammayo.spam.user.repository.UserRepository;
 import com.spammayo.spam.user.service.UserService;
@@ -43,6 +44,7 @@ public class StudyService {
     private final LikeRepository likeRepository;
     private final OfferRepository offerRepository;
     private final UserRepository userRepository;
+    private final TaskRepository taskRepository;
 
     public Study createStudy(Study study) {
         StudyUser studyUser = new StudyUser();
@@ -154,9 +156,9 @@ public class StudyService {
     public Study findStudy(long studyId) {
         Study findStudy = existStudy(studyId);
         forbiddenStudy(findStudy, StudyStatus.CLOSED);
-        StudyStatus studyStatus = findStudy.getStudyStatus();
+
         //모집전인 상태일 경우 작성자만 조회 가능
-        if (studyStatus == StudyStatus.BEFORE_RECRUITMENT) {
+        if (findStudy.getStudyStatus() == StudyStatus.BEFORE_RECRUITMENT) {
             String email = SecurityContextHolder.getContext().getAuthentication().getName();
             User user = userRepository.findByEmail(email)
                     .orElseThrow(() -> new BusinessLogicException(ExceptionCode.ACCESS_FORBIDDEN));
@@ -164,8 +166,7 @@ public class StudyService {
                     .orElseThrow(() -> new BusinessLogicException(ExceptionCode.ACCESS_FORBIDDEN));
         }
 
-        findStudy.setViews(findStudy.getViews() + 1);
-        return studyRepository.save(findStudy);
+        return findStudy;
     }
 
     /*
@@ -188,9 +189,12 @@ public class StudyService {
             throw new BusinessLogicException(ExceptionCode.STUDY_MEMBER_EXISTS);
         }
 
-        //구인글 존재할 경우 삭제
+        //구인글/할일 존재할 경우 삭제
         if (study.getOffer() != null) {
             offerRepository.delete(study.getOffer());
+        }
+        if (!study.getTasks().isEmpty()) {
+            taskRepository.deleteByStudy(study);
         }
 
         study.setStudyStatus(StudyStatus.CLOSED);

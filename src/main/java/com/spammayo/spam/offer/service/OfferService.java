@@ -59,10 +59,14 @@ public class OfferService {
         return offerRepository.save(findOffer);
     }
 
-    @Transactional(readOnly = true)
     public Offer findOffer(long studyId) {
-        Study study = studyService.findStudy(studyId);
-        return existOffer(study.getOffer().getOfferId());
+        Study findStudy = studyService.findStudy(studyId);
+        findStudy.setViews(findStudy.getViews() + 1);
+        studyRepository.save(findStudy);
+        if (findStudy.getOffer() == null) {
+            throw new BusinessLogicException(ExceptionCode.OFFER_NOT_FOUND);
+        }
+        return findStudy.getOffer();
     }
 
     public void deleteOffer(long offerId) {

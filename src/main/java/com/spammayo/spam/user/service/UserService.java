@@ -4,6 +4,10 @@ import com.spammayo.spam.exception.BusinessLogicException;
 import com.spammayo.spam.exception.ExceptionCode;
 import com.spammayo.spam.security.utils.CustomAuthorityUtils;
 import com.spammayo.spam.security.utils.RedisUtils;
+import com.spammayo.spam.status.ApprovalStatus;
+import com.spammayo.spam.status.StudyStatus;
+import com.spammayo.spam.study.entity.StudyUser;
+import com.spammayo.spam.study.repository.StudyRepository;
 import com.spammayo.spam.user.entity.User;
 import com.spammayo.spam.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,15 +32,16 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final CustomAuthorityUtils authorityUtils;
     private final RedisUtils redisUtils;
+    private final StudyRepository studyRepository;
 
     public User join(User user) {
         verifiedUser(user.getEmail());
 
         //이메일 인증 여부 확인
-//        Object authEmail = redisUtils.get("join_" + user.getEmail());
-//        if (authEmail == null || !authEmail.toString().equals("confirm")) {
-//            throw new BusinessLogicException(ExceptionCode.EMAIL_AUTH_REQUIRED);
-//        }
+        Object authEmail = redisUtils.get("join_" + user.getEmail());
+        if (authEmail == null || !authEmail.toString().equals("confirm")) {
+            throw new BusinessLogicException(ExceptionCode.EMAIL_AUTH_REQUIRED);
+        }
 
         List<String> roles = authorityUtils.createRoles(user.getEmail());
         user.setRoles(roles);
@@ -70,7 +75,26 @@ public class UserService {
 
     public void deleteUser(long userId) {
         checkJwtAndUser(userId);
-        userRepository.delete(existUser(userId));
+        User findUser = existUser(userId);
+
+        List<StudyUser> studyUsers = findUser.getStudyUsers();
+
+        boolean forbiddenUser = studyUsers.stream()
+                .anyMatch(studyUser -> studyUser.getApprovalStatus() == ApprovalStatus.APPROVAL
+                        && (studyUser.getStudy().getStudyStatus() == StudyStatus.ONGOING || studyUser.getStudy().getStudyStatus() == StudyStatus.RECRUITING));
+
+        if (forbiddenUser) {
+            throw new BusinessLogicException(ExceptionCode.STUDY_EXISTS);
+        }
+
+        studyUsers.forEach(studyUser -> {
+            if (studyUser.isAdmin()) {
+                studyRepository.delete(studyUser.getStudy());
+            }
+//            else studyUserRepository.delete(studyUser);
+        });
+
+        userRepository.delete(findUser);
     }
 
     public User getUser(long userId) {

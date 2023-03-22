@@ -167,6 +167,7 @@ public class StudyDto {
 
     @NoArgsConstructor
     @Getter @Setter
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class NoticeDto {
         private long studyId;
         @NotBlank

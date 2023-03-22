@@ -127,6 +127,10 @@ public class UserService {
                 .orElseThrow(() -> new BusinessLogicException(ExceptionCode.MEMBER_NOT_FOUND));
     }
 
+    public String getLoginUserEmail() {
+        return SecurityContextHolder.getContext().getAuthentication().getName();
+    }
+
     //본인만 접근 허용
     public void checkJwtAndUser(long userId) {
         if (getLoginUser().getUserId() != userId) {

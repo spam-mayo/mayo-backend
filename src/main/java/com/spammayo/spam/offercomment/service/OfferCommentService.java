@@ -69,7 +69,22 @@ public class OfferCommentService {
     }
 
     @Transactional(readOnly = true)
-    public ResponseEntity findAll(List<OfferComment> offerComment) {
+    public ResponseEntity findAll(List<OfferComment> offerComment, Offer offer) {
+        //TODO : secret 이 true 인 댓글은 study 작성자와 댓글 작성자만 볼수있게 처리
+
+        if (!userService.getLoginUserEmail().equals("anonymousUser")) {
+            User user = userService.getLoginUser();
+            User admin = offer.getStudy().getStudyUsers().stream().filter(StudyUser::isAdmin).findFirst().orElseThrow().getUser();
+
+            offerComment.forEach(comment -> {
+                if (comment.getSecret()) {
+                    User commentUser = comment.getUser();
+                    if (commentUser != user || commentUser != admin) {
+                        comment.setComment(null);
+                    }
+                }
+            });
+        }
 
         List<OfferCommentDto.AllResponseDto> response = offerCommentMapper.commentsToCommentAllResponseDto(offerComment, offerReplyRepository);
 

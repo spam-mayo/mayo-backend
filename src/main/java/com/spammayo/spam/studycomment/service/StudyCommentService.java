@@ -2,6 +2,7 @@ package com.spammayo.spam.studycomment.service;
 
 import com.spammayo.spam.exception.BusinessLogicException;
 import com.spammayo.spam.exception.ExceptionCode;
+import com.spammayo.spam.study.entity.Study;
 import com.spammayo.spam.study.entity.StudyUser;
 import com.spammayo.spam.study.repository.StudyUserRepository;
 import com.spammayo.spam.studycomment.entity.StudyComment;
@@ -61,14 +62,15 @@ public class StudyCommentService {
         return studyCommentRepository.findByTaskAndTask_TaskDate(task, taskDate);
     }
 
-    public void deleteComment(Long studyCommentId, Long studyUserId) {
+    public void deleteComment(Long studyCommentId) {
 
+        //TODO : 댓글 삭제 권한 - 스터디장 & 댓글 작성자만 가능
         StudyComment findComment = verifiedComment(studyCommentId);
+        Study study = findComment.getStudy();
+        User findUser = userService.getLoginUser();
+        User admin = study.getStudyUsers().stream().filter(StudyUser::isAdmin).findFirst().orElseThrow().getUser();
 
-        StudyUser studyUser = studyUserRepository.findById(studyUserId)
-                .orElseThrow(() -> new BusinessLogicException(ExceptionCode.MEMBER_NOT_FOUND));
-
-        if (!findComment.getUser().getEmail().equals(userService.getLoginUser().getEmail()) && !studyUser.isAdmin()) {
+        if (findComment.getUser() != findUser && findComment.getUser() != admin) {
             throw new BusinessLogicException(ExceptionCode.ACCESS_FORBIDDEN);
         }
 

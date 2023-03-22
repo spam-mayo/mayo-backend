@@ -9,4 +9,5 @@ import java.util.Optional;
 public interface TaskRepository extends JpaRepository<Task, Long> {
 
     Optional<Task> findByStudyAndTaskDate(Study study, String taskDate);
+    void deleteByStudy(Study study);
 }

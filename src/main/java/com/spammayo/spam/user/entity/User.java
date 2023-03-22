@@ -46,13 +46,13 @@ public class User extends Auditable {
     @ElementCollection(fetch = FetchType.LAZY)
     private List<String> roles = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user", cascade = { CascadeType.ALL })
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.ALL})
     private List<UserStack> userStacks = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.REMOVE})
     private List<StudyUser> studyUsers = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.REMOVE})
     private List<Like> likes = new ArrayList<>();
 
     public void addUserStack(UserStack userStack) {

@@ -1,8 +1,12 @@
 package com.spammayo.spam.study.controller;
 
 import com.spammayo.spam.dto.MultiResponseDto;
+import com.spammayo.spam.exception.BusinessLogicException;
+import com.spammayo.spam.exception.ExceptionCode;
+import com.spammayo.spam.stack.repository.StackRepository;
 import com.spammayo.spam.study.dto.StudyDto;
 import com.spammayo.spam.study.entity.Study;
+import com.spammayo.spam.study.entity.StudyStack;
 import com.spammayo.spam.study.mapper.StudyMapper;
 import com.spammayo.spam.study.service.StudyService;
 import com.spammayo.spam.user.entity.User;
@@ -28,19 +32,24 @@ public class StudyController {
     private final StudyService studyService;
     private final StudyMapper mapper;
     private final UserMapper userMapper;
+    private final StackRepository stackRepository;
 
     @PostMapping
     public ResponseEntity postStudy(@RequestBody @Valid StudyDto.InputDto postDto) {
-        Study study = studyService.createStudy(mapper.inputDtoToStudy(postDto));
-        return new ResponseEntity<>(mapper.studyToSimpleResponseDto(study), HttpStatus.CREATED);
+        Study study = mapper.inputDtoToStudy(postDto);
+        settingStudyStacks(study, postDto.getStudyStacks());
+        Study createdStudy = studyService.createStudy(study);
+        return new ResponseEntity<>(mapper.studyToSimpleResponseDto(createdStudy), HttpStatus.CREATED);
     }
 
     @PatchMapping("/{study-id}")
     public ResponseEntity patchStudy(@PathVariable("study-id") @Positive long studyId,
                                      @RequestBody @Valid StudyDto.PatchDto patchDto) {
         patchDto.setStudyId(studyId);
-        Study study = studyService.updateStudy(mapper.patchDtoToStudy(patchDto));
-        return new ResponseEntity<>(mapper.studyToSimpleResponseDto(study), HttpStatus.OK);
+        Study study = mapper.patchDtoToStudy(patchDto);
+        settingStudyStacks(study, patchDto.getStudyStacks());
+        Study updatedStudy = studyService.updateStudy(study);
+        return new ResponseEntity<>(mapper.studyToSimpleResponseDto(updatedStudy), HttpStatus.OK);
     }
 
     @GetMapping("/{study-id}")
@@ -139,5 +148,15 @@ public class StudyController {
                                         @PathVariable("assign") @NotBlank String assign) {
         studyService.assignStudyUser(studyId, userId, assign);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    private void settingStudyStacks(Study study, List<String> stacks) {
+        if (stacks != null && !stacks.isEmpty()) {
+            stacks.forEach(stack -> {
+                StudyStack studyStack = new StudyStack();
+                studyStack.setStack(stackRepository.findByStackName(stack).orElseThrow(() -> new BusinessLogicException(ExceptionCode.INVALID_VALUES)));
+                study.addStudyStack(studyStack);
+            });
+        }
     }
 }

@@ -28,17 +28,6 @@ public interface UserMapper {
         user.setUserName( patchDto.getUserName() );
         user.setPassword( patchDto.getPassword() );
         user.setField( patchDto.getField() );
-        List<StackDto> userStacks = patchDto.getUserStacks();
-
-        if (userStacks != null) {
-            userStacks.forEach(stacks -> {
-                Stack stack = new Stack();
-                stack.setStackId(stacks.getStackId());
-                UserStack userStack = new UserStack();
-                userStack.setStack(stack);
-                user.addUserStack(userStack);
-            });
-        }
 
         return user;
     }

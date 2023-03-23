@@ -1,8 +1,12 @@
 package com.spammayo.spam.user.controller;
 
-import com.spammayo.spam.user.mapper.UserMapper;
+import com.spammayo.spam.exception.BusinessLogicException;
+import com.spammayo.spam.exception.ExceptionCode;
+import com.spammayo.spam.stack.repository.StackRepository;
 import com.spammayo.spam.user.dto.UserDto;
 import com.spammayo.spam.user.entity.User;
+import com.spammayo.spam.user.entity.UserStack;
+import com.spammayo.spam.user.mapper.UserMapper;
 import com.spammayo.spam.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -24,6 +28,7 @@ public class UserController {
 
     private final UserService userService;
     private final UserMapper mapper;
+    private final StackRepository stackRepository;
 
     @PostMapping("/join")
     public ResponseEntity postUser(@RequestBody @Valid UserDto.PostDto postDto) {
@@ -35,8 +40,17 @@ public class UserController {
     public ResponseEntity patchUser(@PathVariable("user-id") @Positive long userId,
                                     @RequestBody @Valid UserDto.PatchDto patchDto) {
         patchDto.setUserId(userId);
-        User user = userService.updateUser(mapper.patchDtoToUser(patchDto));
-        return new ResponseEntity<>(mapper.userToSimpleResponseDto(user), HttpStatus.OK);
+        User user = mapper.patchDtoToUser(patchDto);
+        List<String> userStacks = patchDto.getUserStacks();
+        if (userStacks != null) {
+            userStacks.forEach(stack -> {
+                UserStack userStack = new UserStack();
+                userStack.setStack(stackRepository.findByStackName(stack).orElseThrow(() -> new BusinessLogicException(ExceptionCode.INVALID_VALUES)));
+                user.addUserStack(userStack);
+            });
+        }
+        User updatedUser = userService.updateUser(user);
+        return new ResponseEntity<>(mapper.userToSimpleResponseDto(updatedUser), HttpStatus.OK);
 
     }
 

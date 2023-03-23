@@ -1,12 +1,9 @@
 package com.spammayo.spam.study.mapper;
 
-import com.spammayo.spam.stack.dto.StackDto;
-import com.spammayo.spam.stack.entity.Stack;
 import com.spammayo.spam.stack.mapper.StackMapper;
 import com.spammayo.spam.status.StudyStatus;
 import com.spammayo.spam.study.dto.StudyDto;
 import com.spammayo.spam.study.entity.Study;
-import com.spammayo.spam.study.entity.StudyStack;
 import com.spammayo.spam.study.entity.StudyUser;
 import com.spammayo.spam.user.entity.User;
 import org.mapstruct.Mapper;
@@ -47,7 +44,6 @@ public interface StudyMapper {
         study.setPeriod( postDto.getPeriod() );
         study.setStudyStatus(StudyStatus.BEFORE_RECRUITMENT);
 
-        settingStudyStack(study, postDto.getStudyStacks());
         return study;
     }
 
@@ -79,20 +75,7 @@ public interface StudyMapper {
         study.setActivity(patchDto.getActivity());
         study.setPeriod(patchDto.getPeriod());
 
-        settingStudyStack(study, patchDto.getStudyStacks());
         return study;
-    }
-
-    private void settingStudyStack(Study study, List<StackDto> studyStacks) {
-        if (studyStacks != null) {
-            studyStacks.forEach(stacks -> {
-                Stack stack = new Stack();
-                stack.setStackId(stacks.getStackId());
-                StudyStack studyStack = new StudyStack();
-                studyStack.setStack(stack);
-                study.addStudyStack(studyStack);
-            });
-        }
     }
 
     StudyDto.SimpleResponseDto studyToSimpleResponseDto(Study study);

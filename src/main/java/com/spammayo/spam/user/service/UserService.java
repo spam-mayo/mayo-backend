@@ -10,6 +10,7 @@ import com.spammayo.spam.study.entity.StudyUser;
 import com.spammayo.spam.study.repository.StudyRepository;
 import com.spammayo.spam.user.entity.User;
 import com.spammayo.spam.user.repository.UserRepository;
+import com.spammayo.spam.user.repository.UserStackRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -33,6 +34,7 @@ public class UserService {
     private final CustomAuthorityUtils authorityUtils;
     private final RedisUtils redisUtils;
     private final StudyRepository studyRepository;
+    private final UserStackRepository userStackRepository;
 
     public User join(User user) {
         verifiedUser(user.getEmail());
@@ -68,7 +70,10 @@ public class UserService {
         Optional.ofNullable(user.getField())
                 .ifPresent(findUser::setField);
         Optional.ofNullable(user.getUserStacks())
-                .ifPresent(findUser::setUserStacks);
+                .ifPresent(userStack -> {
+                    userStackRepository.deleteAll(findUser.getUserStacks());
+                    findUser.setUserStacks(userStack);
+                });
 
         return userRepository.save(findUser);
     }

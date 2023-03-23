@@ -12,6 +12,7 @@ import com.spammayo.spam.status.StudyStatus;
 import com.spammayo.spam.study.entity.Study;
 import com.spammayo.spam.study.entity.StudyUser;
 import com.spammayo.spam.study.repository.StudyRepository;
+import com.spammayo.spam.study.repository.StudyStackRepository;
 import com.spammayo.spam.study.repository.StudyUserRepository;
 import com.spammayo.spam.task.repository.TaskRepository;
 import com.spammayo.spam.user.entity.User;
@@ -45,6 +46,7 @@ public class StudyService {
     private final OfferRepository offerRepository;
     private final UserRepository userRepository;
     private final TaskRepository taskRepository;
+    private final StudyStackRepository studyStackRepository;
 
     public Study createStudy(Study study) {
         StudyUser studyUser = new StudyUser();
@@ -148,6 +150,7 @@ public class StudyService {
         findStudy.setLongitude(study.getLongitude());
         findStudy.setActivity(study.getActivity());
         findStudy.setPeriod(study.getPeriod());
+        studyStackRepository.deleteAll(findStudy.getStudyStacks());
         findStudy.setStudyStacks(study.getStudyStacks());
 
         return studyRepository.save(findStudy);

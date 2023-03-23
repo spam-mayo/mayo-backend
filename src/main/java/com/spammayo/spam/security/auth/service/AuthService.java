@@ -160,9 +160,7 @@ public class AuthService {
 
     private String setPasswordContext(String authCode) {
         Context context = new Context();
-        //TODO : 추후 url 변경 예정
-//        https://mayo-frontend-47zd.vercel.app/auth/password?authCode=
-        context.setVariable("link", "http://localhost:5173/auth/password?authCode=" + authCode);
+        context.setVariable("link", "https://mayo-frontend-47zd.vercel.app/auth/password?authCode=" + authCode);
         return templateEngine.process("NewPassword", context);
     }
 

@@ -12,7 +12,8 @@ public enum Field {
     FULLSTACK("풀스택"),
     DESIGN("디자인"),
     PLAN("기획"),
-    OTHER("기타");
+    OTHER("기타"),
+    NO_FIELD("없음");
 
     @Getter
     private final String field;

@@ -3,6 +3,7 @@ package com.spammayo.spam.user.controller;
 import com.spammayo.spam.exception.BusinessLogicException;
 import com.spammayo.spam.exception.ExceptionCode;
 import com.spammayo.spam.stack.repository.StackRepository;
+import com.spammayo.spam.status.Field;
 import com.spammayo.spam.user.dto.UserDto;
 import com.spammayo.spam.user.entity.User;
 import com.spammayo.spam.user.entity.UserStack;
@@ -32,6 +33,7 @@ public class UserController {
 
     @PostMapping("/join")
     public ResponseEntity postUser(@RequestBody @Valid UserDto.PostDto postDto) {
+        if (postDto.getField() == null) postDto.setField(Field.NO_FIELD);
         User user = userService.join(mapper.postDtoToUser(postDto));
         return new ResponseEntity<>(mapper.userToSimpleResponseDto(user), HttpStatus.CREATED);
     }

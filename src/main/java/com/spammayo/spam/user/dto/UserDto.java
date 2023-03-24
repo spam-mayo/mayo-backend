@@ -35,7 +35,7 @@ public class UserDto {
         private String password;
 
         //optional
-        private String field;
+        private Field field;
     }
 
     @Getter @Setter

@@ -108,14 +108,17 @@ public class StudyDto {
         }
 
         public String getPersonnel() {
+            if(personnel == null) return null;
             return personnel.getPeopleNumber();
         }
 
         public String getPeriod() {
+            if(period == null) return null;
             return period.getPeriod();
         }
 
         public List<String> getActivity() {
+            if(activity.isEmpty()) return null;
             return activity.stream().map(Field::getField).collect(toList());
         }
     }
@@ -153,6 +156,7 @@ public class StudyDto {
     @NoArgsConstructor
     @AllArgsConstructor
     @Getter @Setter
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class OwnerDto {
         private long userId;
         private String userName;
@@ -161,6 +165,7 @@ public class StudyDto {
         private String userProfileUrl;
 
         public String getField() {
+            if(field == null) return null;
             return field.getField();
         }
     }

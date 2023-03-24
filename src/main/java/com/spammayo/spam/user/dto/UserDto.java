@@ -1,5 +1,6 @@
 package com.spammayo.spam.user.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.spammayo.spam.stack.dto.StackDto;
 import com.spammayo.spam.status.ApprovalStatus;
 import com.spammayo.spam.status.Field;
@@ -63,6 +64,7 @@ public class UserDto {
     @NoArgsConstructor
     @AllArgsConstructor
     @Getter @Setter
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class ResponseDto {
         private Long userId;
         private String userName;
@@ -72,6 +74,7 @@ public class UserDto {
         private List<StackDto> stack;
 
         public String getField() {
+            if(field == null) return null;
             return field.getField();
         }
     }
@@ -80,6 +83,7 @@ public class UserDto {
     @NoArgsConstructor
     @AllArgsConstructor
     @Getter @Setter
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class ListResponseDto {
         private Long userId;
         private String userName;
@@ -90,6 +94,7 @@ public class UserDto {
         private ApprovalStatus approvalStatus;
 
         public String getField() {
+            if(field == null) return null;
             return field.getField();
         }
 

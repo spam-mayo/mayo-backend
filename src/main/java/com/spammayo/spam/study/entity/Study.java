@@ -56,7 +56,7 @@ public class Study extends Auditable {
     private StudyStatus studyStatus;
 
     @Column(nullable = false)
-    private boolean online;
+    private Boolean online;
 
     private long views;
 

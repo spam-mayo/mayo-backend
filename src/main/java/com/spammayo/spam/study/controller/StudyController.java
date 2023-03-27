@@ -12,6 +12,7 @@ import com.spammayo.spam.study.service.StudyService;
 import com.spammayo.spam.user.entity.User;
 import com.spammayo.spam.user.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +28,7 @@ import java.util.List;
 @RequestMapping("/api/study")
 @RequiredArgsConstructor
 @Validated
+@Slf4j
 public class StudyController {
 
     private final StudyService studyService;
@@ -151,12 +153,14 @@ public class StudyController {
     }
 
     private void settingStudyStacks(Study study, List<String> stacks) {
-        if (stacks != null && !stacks.isEmpty()) {
+        if (stacks != null) {
             stacks.forEach(stack -> {
                 StudyStack studyStack = new StudyStack();
                 studyStack.setStack(stackRepository.findByStackName(stack).orElseThrow(() -> new BusinessLogicException(ExceptionCode.INVALID_VALUES)));
                 study.addStudyStack(studyStack);
             });
+        } else {
+            study.setStudyStacks(null);
         }
     }
 }

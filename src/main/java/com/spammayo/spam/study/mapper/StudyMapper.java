@@ -32,9 +32,9 @@ public interface StudyMapper {
         study.setPersonnel( postDto.getPersonnel() );
 
         //장소없음 check시
-        study.setOnline(postDto.isOnline());
+        study.setOnline(postDto.getOnline());
 
-        if (!postDto.isOnline()) {
+        if (!postDto.getOnline()) {
             study.setPlace( postDto.getPlace() );
             study.setLatitude( postDto.getLatitude() );
             study.setLongitude( postDto.getLongitude() );
@@ -60,9 +60,9 @@ public interface StudyMapper {
         study.setEndDate(patchDto.getEndDate());
         study.setPersonnel(patchDto.getPersonnel());
 
-        study.setOnline(patchDto.isOnline());
+        study.setOnline(patchDto.getOnline());
 
-        if (patchDto.isOnline()) {
+        if (patchDto.getOnline()) {
             study.setPlace(null);
             study.setLongitude(null);
             study.setLatitude(null);
@@ -101,7 +101,7 @@ public interface StudyMapper {
                 .activity(study.getActivity())
                 .period(study.getPeriod())
                 .studyStatus(study.getStudyStatus())
-                .online(study.isOnline())
+                .online(study.getOnline())
                 .createdAt(study.getCreatedAt().toLocalDate())
                 .owner(ownerDto)
                 .stack(stackMapper.toStudyStackDto(study))
@@ -127,7 +127,7 @@ public interface StudyMapper {
                     .startDate(study.getStartDate())
                     .endDate(study.getEndDate())
                     .studyStatus(study.getStudyStatus())
-                    .online(study.isOnline())
+                    .online(study.getOnline())
                     .checkLikes(isCheck(study))
                     .owner(ownerDto)
                     .stack(stackMapper.toStudyStackDto(study))
@@ -163,10 +163,10 @@ public interface StudyMapper {
             StudyUser findStudyUser = study.getStudyUsers().stream().filter(studyUser -> studyUser.getUser().getEmail().equals(email)).findFirst().orElse(null);
 
             if (findStudyUser == null) {
-                myPageResponseDto.setAdmin(false);
+                myPageResponseDto.setIsAdmin(false);
                 myPageResponseDto.setApprovalStatus(null);
             } else {
-                myPageResponseDto.setAdmin(findStudyUser.isAdmin());
+                myPageResponseDto.setIsAdmin(findStudyUser.isAdmin());
                 myPageResponseDto.setApprovalStatus(findStudyUser.getApprovalStatus());
             }
 

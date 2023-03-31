@@ -50,7 +50,7 @@ public class UserController {
                 userStack.setStack(stackRepository.findByStackName(stack).orElseThrow(() -> new BusinessLogicException(ExceptionCode.INVALID_VALUES)));
                 user.addUserStack(userStack);
             });
-        }
+        } else user.setUserStacks(null);
         User updatedUser = userService.updateUser(user);
         return new ResponseEntity<>(mapper.userToSimpleResponseDto(updatedUser), HttpStatus.OK);
 

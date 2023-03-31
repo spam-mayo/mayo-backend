@@ -11,7 +11,7 @@ public class WebConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
 
         registry.addMapping("/**")
-                .allowedOrigins("*") //TODO : 추후 프론트 서버로 수정예
+                .allowedOrigins("http://localhost:3000", "https://mayo-frontend.vercel.app")
                 .allowedMethods("GET", "POST", "PATCH", "DELETE", "PUT", "OPTIONS")
                 .allowedHeaders("*")
                 .exposedHeaders("*")

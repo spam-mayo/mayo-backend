@@ -2,8 +2,11 @@ package com.spammayo.spam.user.entity;
 
 import com.spammayo.spam.audit.Auditable;
 import com.spammayo.spam.likes.Like;
+import com.spammayo.spam.offercomment.entity.OfferComment;
+import com.spammayo.spam.offerreply.entity.OfferReply;
 import com.spammayo.spam.status.Field;
 import com.spammayo.spam.study.entity.StudyUser;
+import com.spammayo.spam.studycomment.entity.StudyComment;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -55,18 +58,17 @@ public class User extends Auditable {
     @OneToMany(mappedBy = "user", cascade = {CascadeType.REMOVE})
     private List<Like> likes = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.REMOVE})
+    private List<StudyComment> studyComments = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.REMOVE})
+    private List<OfferComment> offerComments = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.REMOVE})
+    private List<OfferReply> offerReply = new ArrayList<>();
+
     public void addUserStack(UserStack userStack) {
         userStacks.add(userStack);
         userStack.setUser(this);
-    }
-
-    public void addStudyUser(StudyUser studyUser) {
-        studyUsers.add(studyUser);
-        studyUser.setUser(this);
-    }
-
-    public void addLike(Like like) {
-        likes.add(like);
-        like.setUser(this   );
     }
 }

@@ -538,7 +538,7 @@ public class StudyService {
     public void forbiddenStudy(Study study, StudyStatus ... status) {
         for (StudyStatus studyStatus : status) {
             if (study.getStudyStatus() == studyStatus) {
-                throw new BusinessLogicException(ExceptionCode.ACCESS_FORBIDDEN);
+                throw new BusinessLogicException(ExceptionCode.INVALID_STUDY_STATUS);
             }
         }
     }

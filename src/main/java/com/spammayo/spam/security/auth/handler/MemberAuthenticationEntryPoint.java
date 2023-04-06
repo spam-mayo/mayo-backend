@@ -20,7 +20,7 @@ public class MemberAuthenticationEntryPoint implements AuthenticationEntryPoint 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
         Exception exception = (Exception) request.getAttribute("exception");
-        if (exception.getMessage().contains("JWT expired at")) {
+        if (exception.getMessage() != null && exception.getMessage().contains("JWT expired at")) {
             ErrorResponder.sendCustomErrorResponse(response, new BusinessLogicException(ExceptionCode.EXPIRED_JWT_TOKEN));
         } else {
             ErrorResponder.sendErrorResponse(response, HttpStatus.UNAUTHORIZED);

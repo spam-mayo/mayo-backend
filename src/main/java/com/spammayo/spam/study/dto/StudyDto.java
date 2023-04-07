@@ -32,7 +32,7 @@ public class StudyDto {
 
         private Personnel personnel;
 
-        private boolean online;
+        private Boolean online;
         private String place;
 
         private Double latitude;
@@ -60,7 +60,7 @@ public class StudyDto {
 
         private Personnel personnel;
 
-        private boolean online;
+        private Boolean online;
         private String place;
 
         private Double latitude;
@@ -96,8 +96,8 @@ public class StudyDto {
         private List<Field> activity;
         private Period period;
         private StudyStatus studyStatus;
-        private boolean online;
-        private boolean checkLikes;
+        private Boolean online;
+        private Boolean checkLikes;
         private List<StackDto> stack;
         private LocalDate createdAt;
 
@@ -133,9 +133,9 @@ public class StudyDto {
         private String startDate;
         private String endDate;
         private StudyStatus studyStatus;
-        private boolean online;
+        private Boolean online;
         private List<StackDto> stack;
-        private boolean checkLikes;
+        private Boolean checkLikes;
 
         private SimpleOwnerDto owner;
 
@@ -194,7 +194,7 @@ public class StudyDto {
         private ApprovalStatus approvalStatus;
 
         //admin
-        private boolean isAdmin;
+        private Boolean isAdmin;
 
         public String getStudyStatus() {
             return studyStatus.getStatus();

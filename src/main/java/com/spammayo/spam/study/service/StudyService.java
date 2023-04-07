@@ -141,17 +141,27 @@ public class StudyService {
             }
         }
 
-
-        findStudy.setStudyName(study.getStudyName());
-        findStudy.setPersonnel(study.getPersonnel());
-        findStudy.setOnline(study.isOnline());
-        findStudy.setPlace(study.getPlace());
-        findStudy.setLatitude(study.getLatitude());
-        findStudy.setLongitude(study.getLongitude());
-        findStudy.setActivity(study.getActivity());
-        findStudy.setPeriod(study.getPeriod());
-        studyStackRepository.deleteAll(findStudy.getStudyStacks());
-        findStudy.setStudyStacks(study.getStudyStacks());
+        Optional.ofNullable(study.getStudyName())
+                .ifPresent(findStudy::setStudyName);
+        Optional.ofNullable(study.getPersonnel())
+                .ifPresent(findStudy::setPersonnel);
+        Optional.ofNullable(study.getOnline())
+                .ifPresent(findStudy::setOnline);
+        Optional.ofNullable(study.getPlace())
+                .ifPresent(findStudy::setPlace);
+        Optional.ofNullable(study.getLatitude())
+                .ifPresent(findStudy::setLatitude);
+        Optional.ofNullable(study.getLongitude())
+                .ifPresent(findStudy::setLongitude);
+        Optional.ofNullable(study.getActivity())
+                .ifPresent(findStudy::setActivity);
+        Optional.ofNullable(study.getPeriod())
+                .ifPresent(findStudy::setPeriod);
+        Optional.ofNullable(study.getStudyStacks())
+                .ifPresent(stacks -> {
+                    studyStackRepository.deleteAll(findStudy.getStudyStacks());
+                    findStudy.setStudyStacks(stacks);
+                });
 
         return studyRepository.save(findStudy);
     }
@@ -296,9 +306,9 @@ public class StudyService {
             studies = studies.stream()
                     .filter(study -> {
                         if (!findArea.equals(Area.ONLINE)) {
-                            return !study.isOnline() && study.getPlace().contains(findArea.getArea());
+                            return !study.getOnline() && study.getPlace().contains(findArea.getArea());
                         } else {
-                            return study.isOnline();
+                            return study.getOnline();
                         }
                     })
                     .collect(Collectors.toList());
@@ -528,7 +538,7 @@ public class StudyService {
     public void forbiddenStudy(Study study, StudyStatus ... status) {
         for (StudyStatus studyStatus : status) {
             if (study.getStudyStatus() == studyStatus) {
-                throw new BusinessLogicException(ExceptionCode.ACCESS_FORBIDDEN);
+                throw new BusinessLogicException(ExceptionCode.INVALID_STUDY_STATUS);
             }
         }
     }

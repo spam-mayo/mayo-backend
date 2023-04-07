@@ -224,7 +224,7 @@ public class StudyService {
             if (tab.equals("crew")) {
                 studyUsers = studyUsers.stream().filter(studyUser -> studyUser.getApprovalStatus().equals(ApprovalStatus.APPROVAL)).collect(Collectors.toList());
             } else if (tab.equals("apply")) {
-                studyUsers = studyUsers.stream().filter(studyUser -> !(studyUser.getApprovalStatus().equals(ApprovalStatus.APPROVAL))).collect(Collectors.toList());
+                studyUsers = studyUsers.stream().filter(studyUser -> !studyUser.isAdmin()).collect(Collectors.toList());
             } else if (tab.equals("admin")) {
                 studyUsers = studyUsers.stream().filter(StudyUser::isAdmin).collect(Collectors.toList());
             } else if (tab.equals("likes")) {
@@ -282,13 +282,11 @@ public class StudyService {
             List<Study> finalStudies = studies;
             List<Study> list = new ArrayList<>();
 
-            field.forEach(studyField -> {
-                finalStudies.forEach(study -> {
-                    if (study.getActivity().contains(Field.toField(studyField))) {
-                        list.add(study);
-                    }
-                });
-            });
+            field.forEach(studyField -> finalStudies.forEach(study -> {
+                if (study.getActivity().contains(Field.toField(studyField))) {
+                    list.add(study);
+                }
+            }));
             studies = list.stream().distinct().collect(Collectors.toList());
         }
         if (stack != null) {
@@ -538,7 +536,7 @@ public class StudyService {
     public void forbiddenStudy(Study study, StudyStatus ... status) {
         for (StudyStatus studyStatus : status) {
             if (study.getStudyStatus() == studyStatus) {
-                throw new BusinessLogicException(ExceptionCode.ACCESS_FORBIDDEN);
+                throw new BusinessLogicException(ExceptionCode.INVALID_STUDY_STATUS);
             }
         }
     }

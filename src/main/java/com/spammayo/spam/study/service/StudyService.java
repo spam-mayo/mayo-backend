@@ -216,10 +216,14 @@ public class StudyService {
 
     //tab : 참여중(crew), 생성(admin), 관심(likes) + 신청한(apply)
     //status : 전체, 진행중, 모집중, 모집전, 완료, 폐쇄
-    public Page<Study> getUserStudy(String tab, String status, int page, int size) {
-
+    public Page<Study> getUserStudy(String tab, String status, int page, int size, String approvalStatus) {
         List<StudyUser> studyUsers = userService.getLoginUser().getStudyUsers();
         List<Study> studies = new ArrayList<>();
+        if (approvalStatus != null) {
+            studyUsers = studyUsers.stream()
+                    .filter(studyUser -> studyUser.getApprovalStatus().equals(ApprovalStatus.valueOf(approvalStatus.toUpperCase())))
+                    .collect(Collectors.toList());
+        }
         if (tab != null) {
             if (tab.equals("crew")) {
                 studyUsers = studyUsers.stream().filter(studyUser -> studyUser.getApprovalStatus().equals(ApprovalStatus.APPROVAL)).collect(Collectors.toList());
@@ -281,6 +285,7 @@ public class StudyService {
         if (field != null) {
             List<Study> finalStudies = studies;
             List<Study> list = new ArrayList<>();
+
 
             field.forEach(studyField -> finalStudies.forEach(study -> {
                 if (study.getActivity().contains(Field.toField(studyField))) {

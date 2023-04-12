@@ -93,8 +93,9 @@ public class StudyController {
     public ResponseEntity getUserStudy(@RequestParam(required = false) String tab,
                                        @RequestParam(required = false) String status,
                                        @RequestParam @Positive int page,
-                                       @RequestParam @Positive int size) {
-        Page<Study> pages = studyService.getUserStudy(tab, status, page - 1, size);
+                                       @RequestParam @Positive int size,
+                                       @RequestParam(required = false) String approvalStatus) {
+        Page<Study> pages = studyService.getUserStudy(tab, status, page - 1, size, approvalStatus);
         List<Study> studies = pages.getContent();
         return new ResponseEntity<>(new MultiResponseDto<>(mapper.studiesToMyPageResponseDto(studies), pages), HttpStatus.OK);
     }

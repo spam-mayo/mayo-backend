@@ -68,7 +68,7 @@ public class OfferCommentController {
 
         List<OfferComment> offerComment = offerCommentRepository.findByOffer(offer);
 
-        return offerCommentService.findAll(offerComment);
+        return offerCommentService.findAll(offerComment, offer);
     }
 
     @DeleteMapping("/{offerCommentId}")

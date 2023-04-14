@@ -69,7 +69,28 @@ public class OfferCommentService {
     }
 
     @Transactional(readOnly = true)
-    public ResponseEntity findAll(List<OfferComment> offerComment) {
+    public ResponseEntity findAll(List<OfferComment> offerComment, Offer offer) {
+
+        if (!userService.getLoginUserEmail().equals("anonymousUser")) {
+            User user = userService.getLoginUser();
+            User admin = offer.getStudy().getStudyUsers().stream().filter(StudyUser::isAdmin).findFirst().orElseThrow().getUser();
+
+            offerComment.forEach(comment -> {
+                if (comment.getSecret()) {
+                    User commentUser = comment.getUser();
+                    if (user != commentUser && user != admin) {
+                        comment.setComment(null);
+                    }
+                }
+            });
+        }
+        else {
+            offerComment.forEach(comment -> {
+                if (comment.getSecret()) {
+                    comment.setComment(null);
+                }
+            });
+        }
 
         List<OfferCommentDto.AllResponseDto> response = offerCommentMapper.commentsToCommentAllResponseDto(offerComment, offerReplyRepository);
 

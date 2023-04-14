@@ -68,10 +68,9 @@ public class StudyCommentController {
     }
 
     @DeleteMapping("/{studyCommentId}")
-    public ResponseEntity deleteComment(@PathVariable("studyCommentId") @Positive Long studyCommentId,
-                                        @RequestParam @NotNull Long studyUserId) {
+    public ResponseEntity deleteComment(@PathVariable("studyCommentId") @Positive Long studyCommentId) {
 
-        studyCommentService.deleteComment(studyCommentId, studyUserId);
+        studyCommentService.deleteComment(studyCommentId);
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

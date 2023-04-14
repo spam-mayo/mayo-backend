@@ -7,6 +7,7 @@ import com.spammayo.spam.status.Field;
 import com.spammayo.spam.status.Period;
 import com.spammayo.spam.status.Personnel;
 import com.spammayo.spam.status.StudyStatus;
+import com.spammayo.spam.studycomment.entity.StudyComment;
 import com.spammayo.spam.task.entity.Task;
 import lombok.*;
 
@@ -79,6 +80,9 @@ public class Study extends Auditable {
 
     @OneToMany(mappedBy = "study", cascade = CascadeType.REMOVE)
     private List<Task> tasks = new ArrayList<>();
+
+    @OneToMany(mappedBy = "study", cascade = CascadeType.REMOVE)
+    private List<StudyComment> comments = new ArrayList<>();
 
     public void addStudyStack(StudyStack studyStack) {
         studyStacks.add(studyStack);

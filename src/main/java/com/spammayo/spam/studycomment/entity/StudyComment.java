@@ -38,4 +38,9 @@ public class StudyComment extends Auditable {
         this.task = task;
         task.getStudyComments().add(this);
     }
+
+    public void setStudy(Study study) {
+        this.study = study;
+        study.getComments().add(this);
+    }
 }

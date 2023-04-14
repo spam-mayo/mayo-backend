@@ -4,7 +4,6 @@ import com.spammayo.spam.exception.BusinessLogicException;
 import com.spammayo.spam.exception.ExceptionCode;
 import com.spammayo.spam.study.entity.Study;
 import com.spammayo.spam.study.entity.StudyUser;
-import com.spammayo.spam.study.repository.StudyUserRepository;
 import com.spammayo.spam.studycomment.entity.StudyComment;
 import com.spammayo.spam.studycomment.repository.StudyCommentRepository;
 import com.spammayo.spam.task.entity.Task;
@@ -26,7 +25,6 @@ public class StudyCommentService {
     private final StudyCommentRepository studyCommentRepository;
     private final TaskService taskService;
     private final UserService userService;
-    private final StudyUserRepository studyUserRepository;
 
     public StudyComment createComment(StudyComment studyComment,
                                       Long taskId,
@@ -34,10 +32,12 @@ public class StudyCommentService {
 
         Task task = taskService.findTask(taskId, todoDate);
         User user = userService.getLoginUser();
+        Study study = task.getStudy();
 
         task.addStudyComment(studyComment);
         studyComment.setUser(user);
         studyComment.setTask(task);
+        studyComment.setStudy(study);
 
         return studyCommentRepository.save(studyComment);
     }
@@ -64,13 +64,13 @@ public class StudyCommentService {
 
     public void deleteComment(Long studyCommentId) {
 
-        //TODO : 댓글 삭제 권한 - 스터디장 & 댓글 작성자만 가능
         StudyComment findComment = verifiedComment(studyCommentId);
         Study study = findComment.getStudy();
-        User findUser = userService.getLoginUser();
+        User user = userService.getLoginUser();
         User admin = study.getStudyUsers().stream().filter(StudyUser::isAdmin).findFirst().orElseThrow().getUser();
 
-        if (findComment.getUser() != findUser && findComment.getUser() != admin) {
+        // 댓글 작성자 / 스터디장이 아닐 경우
+        if (user != findComment.getUser() && user != admin) {
             throw new BusinessLogicException(ExceptionCode.ACCESS_FORBIDDEN);
         }
 

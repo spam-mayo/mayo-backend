@@ -431,7 +431,7 @@ public class StudyService {
 
         User user = userService.getLoginUser();
         user.getStudyUsers().forEach(studyUser -> {
-            if (studyUser.getStudy() == study) {
+            if (studyUser.getStudy() == study && studyUser.getApprovalStatus() != ApprovalStatus.REJECT) {
                 throw new BusinessLogicException(ExceptionCode.STUDY_REQUEST_EXISTS);
             }
         });

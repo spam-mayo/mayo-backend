@@ -54,7 +54,7 @@ public class TaskService {
         Study study = studyService.existStudy(studyId);
         studyService.verifiedCrew(study);
         return taskRepository.findByStudyAndTaskDate(study, taskDate)
-                .orElseThrow(() -> new BusinessLogicException(ExceptionCode.ACCESS_FORBIDDEN));
+                .orElseThrow(() -> new BusinessLogicException(ExceptionCode.TASK_NOT_FOUND));
     }
 
     private void verifiedTask(String taskDate, long studyId) {
@@ -69,5 +69,4 @@ public class TaskService {
         return taskRepository.findById(taskId)
                 .orElseThrow(() -> new BusinessLogicException(ExceptionCode.TASK_NOT_FOUND));
     }
-
 }

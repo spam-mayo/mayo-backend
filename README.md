@@ -4,6 +4,9 @@
 ## 📎 배포 링크 ##
 https://mayo-frontend.vercel.app/
 
+## 📆 프로젝트 기간 ##
+### 2023.02 - 2023.03
+
 ## 📚 Front-end Repository ##
 https://github.com/spam-mayo/mayo-frontend
 

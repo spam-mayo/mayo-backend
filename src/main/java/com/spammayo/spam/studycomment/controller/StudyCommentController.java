@@ -24,12 +24,12 @@ public class StudyCommentController {
     private final StudyCommentService studyCommentService;
     private final StudyCommentMapper studyCommentMapper;
 
-    @PostMapping("/task/{taskId}")
-    public ResponseEntity postComment(@PathVariable("taskId") @Positive Long taskId,
+    @PostMapping("/study/{studyId}")
+    public ResponseEntity postComment(@PathVariable("studyId") @Positive Long studyId,
                                       @RequestBody @Valid StudyCommentDto.PostDto requestBody) {
 
         StudyComment studyComment = studyCommentService.createComment(
-                studyCommentMapper.postDtoToStudyComment(requestBody), taskId, requestBody.getTaskDate());
+                studyCommentMapper.postDtoToStudyComment(requestBody), studyId, requestBody.getTaskDate());
 
         return new ResponseEntity<>(studyCommentMapper.studyCommentToStudyCommentResponseDto(studyComment), HttpStatus.CREATED);
     }

@@ -28,9 +28,9 @@ public class StudyCommentService {
 
     public StudyComment createComment(StudyComment studyComment,
                                       Long taskId,
-                                      String todoDate) {
+                                      String taskDate) {
 
-        Task task = taskService.findTask(taskId, todoDate);
+        Task task = taskService.findTask(taskId, taskDate);
         User user = userService.getLoginUser();
         Study study = task.getStudy();
 

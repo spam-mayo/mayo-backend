@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import java.util.List;
 
@@ -30,7 +29,7 @@ public class StudyCommentController {
                                       @RequestBody @Valid StudyCommentDto.PostDto requestBody) {
 
         StudyComment studyComment = studyCommentService.createComment(
-                studyCommentMapper.postDtoToStudyComment(requestBody), taskId, requestBody.getTodoDate());
+                studyCommentMapper.postDtoToStudyComment(requestBody), taskId, requestBody.getTaskDate());
 
         return new ResponseEntity<>(studyCommentMapper.studyCommentToStudyCommentResponseDto(studyComment), HttpStatus.CREATED);
     }

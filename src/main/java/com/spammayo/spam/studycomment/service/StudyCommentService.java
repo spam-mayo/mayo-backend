@@ -27,10 +27,10 @@ public class StudyCommentService {
     private final UserService userService;
 
     public StudyComment createComment(StudyComment studyComment,
-                                      Long taskId,
+                                      Long studyId,
                                       String taskDate) {
 
-        Task task = taskService.findTask(taskId, taskDate);
+        Task task = taskService.findTask(studyId, taskDate);
         User user = userService.getLoginUser();
         Study study = task.getStudy();
 

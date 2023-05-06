@@ -9,6 +9,7 @@ import com.spammayo.spam.offercomment.entity.OfferComment;
 import com.spammayo.spam.offercomment.mapper.OfferCommentMapper;
 import com.spammayo.spam.offercomment.repository.OfferCommentRepository;
 import com.spammayo.spam.offerreply.repository.OfferReplyRepository;
+import com.spammayo.spam.study.entity.Study;
 import com.spammayo.spam.study.entity.StudyUser;
 import com.spammayo.spam.study.repository.StudyUserRepository;
 import com.spammayo.spam.user.entity.User;
@@ -34,9 +35,9 @@ public class OfferCommentService {
     private final OfferReplyRepository offerReplyRepository;
 
     public OfferComment createComment(OfferComment comment,
-                                      Long offerId) {
+                                      Long studyId) {
 
-        Offer offer = offerService.findOffer(offerId);
+        Offer offer = offerService.findOffer(studyId);
         User user = userService.getLoginUser();
 
         offer.addComment(comment);
@@ -97,14 +98,15 @@ public class OfferCommentService {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    public void deleteComment(Long offerCommentId, Long studyUserId) {
+    public void deleteComment(Long offerCommentId) {
 
         OfferComment findComment = verifiedComment(offerCommentId);
+        Study study = findComment.getOffer().getStudy();
+        User user = userService.getLoginUser();
+        User admin = study.getStudyUsers().stream().filter(StudyUser::isAdmin).findFirst().orElseThrow().getUser();
 
-        StudyUser studyUser = studyUserRepository.findById(studyUserId)
-                .orElseThrow(() -> new BusinessLogicException(ExceptionCode.MEMBER_NOT_FOUND));
-
-        if (!findComment.getUser().getEmail().equals(userService.getLoginUser().getEmail()) && !studyUser.isAdmin()) {
+        // 댓글 작성자 / 스터디장이 아닐 경우
+        if (user != findComment.getUser() && user != admin) {
             throw new BusinessLogicException(ExceptionCode.ACCESS_FORBIDDEN);
         }
 

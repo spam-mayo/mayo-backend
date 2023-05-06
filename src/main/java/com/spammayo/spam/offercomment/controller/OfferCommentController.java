@@ -29,12 +29,12 @@ public class OfferCommentController {
     private final OfferCommentMapper offerCommentMapper;
     private final OfferCommentRepository offerCommentRepository;
 
-    @PostMapping("/offer/{offerId}")
-    public ResponseEntity postComment(@PathVariable("offerId") @Positive Long offerId,
+    @PostMapping("/study/{studyId}")
+    public ResponseEntity postComment(@PathVariable("studyId") @Positive Long studyId,
                                       @RequestBody @Valid OfferCommentDto.PostDto requestBody) {
 
         OfferComment offerComment = offerCommentService.createComment(
-                offerCommentMapper.commentPostDtoToComment(requestBody), offerId);
+                offerCommentMapper.commentPostDtoToComment(requestBody), studyId);
 
         return new ResponseEntity<>(offerCommentMapper.commentToCommentResponseDto(offerComment), HttpStatus.CREATED);
     }
@@ -72,10 +72,9 @@ public class OfferCommentController {
     }
 
     @DeleteMapping("/{offerCommentId}")
-    public ResponseEntity deleteComment(@PathVariable("offerCommentId") @Positive Long offerCommentId,
-                                        @RequestParam @NotNull Long studyUserId) {
+    public ResponseEntity deleteComment(@PathVariable("offerCommentId") @Positive Long offerCommentId) {
 
-        offerCommentService.deleteComment(offerCommentId, studyUserId);
+        offerCommentService.deleteComment(offerCommentId);
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

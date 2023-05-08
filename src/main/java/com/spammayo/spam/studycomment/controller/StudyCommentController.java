@@ -42,7 +42,7 @@ public class StudyCommentController {
 
         StudyComment studyComment = studyCommentService.updateComment(
                 studyCommentMapper.patchDtoToStudyComment(requestBody),
-                requestBody.getTaskId());
+                requestBody.getStudyCommentId());
 
         studyComment.setStudyCommentId(studyCommentId);
 

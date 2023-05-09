@@ -45,6 +45,7 @@ public class StudyCommentDto {
     @Builder
     @AllArgsConstructor
     public static class AllResponseDto {
+        private Long userId;
         private String userName;
         private String profileUrl;
         private String createdAt;

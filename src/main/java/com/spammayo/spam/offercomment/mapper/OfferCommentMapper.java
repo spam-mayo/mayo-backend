@@ -54,6 +54,7 @@ public interface OfferCommentMapper {
 
         return comment.stream()
                 .map(offerComment -> OfferCommentDto.AllResponseDto.builder()
+                        .userId(offerComment.getUser().getUserId())
                         .userName(offerComment.getUser().getUserName())
                         .profileUrl(offerComment.getUser().getProfileUrl())
                         .createdAt(offerComment.getCreatedAt())
@@ -69,6 +70,8 @@ public interface OfferCommentMapper {
 
         return offerReplies.stream()
                 .map(reply -> OfferReplyDto.ResponseDto.builder()
+                        .replyId(reply.getReplyId())
+                        .userId(reply.getUser().getUserId())
                         .userName(reply.getUser().getUserName())
                         .profileUrl(reply.getUser().getProfileUrl())
                         .createdAt(reply.getCreatedAt())

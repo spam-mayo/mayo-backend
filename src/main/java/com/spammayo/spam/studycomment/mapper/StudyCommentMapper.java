@@ -48,6 +48,7 @@ public interface StudyCommentMapper {
 
         return studyComments.stream()
                 .map(studycomment -> StudyCommentDto.AllResponseDto.builder()
+                        .userId(studycomment.getUser().getUserId())
                         .userName(studycomment.getUser().getUserName())
                         .profileUrl(studycomment.getUser().getProfileUrl())
                         .createdAt(studycomment.getCreatedAt().toString())

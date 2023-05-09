@@ -16,6 +16,8 @@ public interface OfferReplyMapper {
     default OfferReplyDto.ResponseDto offerReplyToOfferReplyResponseDto(OfferReply offerReply) {
 
         return OfferReplyDto.ResponseDto.builder()
+                .replyId(offerReply.getReplyId())
+                .userId(offerReply.getUser().getUserId())
                 .userName(offerReply.getUser().getUserName())
                 .profileUrl(offerReply.getUser().getProfileUrl())
                 .createdAt(offerReply.getCreatedAt())

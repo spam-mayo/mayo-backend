@@ -33,6 +33,8 @@ public class OfferReplyDto {
     @Builder
     @AllArgsConstructor
     public static class ResponseDto {
+        private Long replyId;
+        private Long userId;
         private String userName;
         private String profileUrl;
         private LocalDateTime createdAt;

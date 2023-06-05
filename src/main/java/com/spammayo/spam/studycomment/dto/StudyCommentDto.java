@@ -12,7 +12,7 @@ public class StudyCommentDto {
 
         private Long taskId;
         @NotBlank
-        private String todoDate;
+        private String taskDate;
         @NotBlank
         private String comment;
     }
@@ -25,7 +25,7 @@ public class StudyCommentDto {
 
         private Long taskId;
         @NotBlank
-        private String todoDate;
+        private String taskDate;
 
         private Long userId;
         @NotBlank
@@ -45,6 +45,7 @@ public class StudyCommentDto {
     @Builder
     @AllArgsConstructor
     public static class AllResponseDto {
+        private Long userId;
         private String userName;
         private String profileUrl;
         private String createdAt;

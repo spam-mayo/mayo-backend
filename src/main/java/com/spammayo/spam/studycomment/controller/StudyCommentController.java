@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import java.util.List;
 
@@ -25,12 +24,12 @@ public class StudyCommentController {
     private final StudyCommentService studyCommentService;
     private final StudyCommentMapper studyCommentMapper;
 
-    @PostMapping("/task/{taskId}")
-    public ResponseEntity postComment(@PathVariable("taskId") @Positive Long taskId,
+    @PostMapping("/study/{studyId}")
+    public ResponseEntity postComment(@PathVariable("studyId") @Positive Long studyId,
                                       @RequestBody @Valid StudyCommentDto.PostDto requestBody) {
 
         StudyComment studyComment = studyCommentService.createComment(
-                studyCommentMapper.postDtoToStudyComment(requestBody), taskId, requestBody.getTodoDate());
+                studyCommentMapper.postDtoToStudyComment(requestBody), studyId, requestBody.getTaskDate());
 
         return new ResponseEntity<>(studyCommentMapper.studyCommentToStudyCommentResponseDto(studyComment), HttpStatus.CREATED);
     }
@@ -43,7 +42,7 @@ public class StudyCommentController {
 
         StudyComment studyComment = studyCommentService.updateComment(
                 studyCommentMapper.patchDtoToStudyComment(requestBody),
-                requestBody.getTaskId());
+                requestBody.getStudyCommentId());
 
         studyComment.setStudyCommentId(studyCommentId);
 
@@ -68,10 +67,9 @@ public class StudyCommentController {
     }
 
     @DeleteMapping("/{studyCommentId}")
-    public ResponseEntity deleteComment(@PathVariable("studyCommentId") @Positive Long studyCommentId,
-                                        @RequestParam @NotNull Long studyUserId) {
+    public ResponseEntity deleteComment(@PathVariable("studyCommentId") @Positive Long studyCommentId) {
 
-        studyCommentService.deleteComment(studyCommentId, studyUserId);
+        studyCommentService.deleteComment(studyCommentId);
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

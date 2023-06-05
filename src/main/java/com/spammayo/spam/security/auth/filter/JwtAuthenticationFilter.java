@@ -36,9 +36,9 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
         //로그인 http method : POST
-        if (!request.getMethod().equals("POST")) {
-            throw new BusinessLogicException(ExceptionCode.METHOD_NOT_ALLOWED);
-        }
+        //if (!request.getMethod().equals("POST")) {
+        //    throw new BusinessLogicException(ExceptionCode.METHOD_NOT_ALLOWED);
+        //}
         LoginDto loginDto = new LoginDto();
         UsernamePasswordAuthenticationToken authenticationToken;
         try {

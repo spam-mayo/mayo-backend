@@ -171,7 +171,9 @@ public class StudyService {
         forbiddenStudy(findStudy, StudyStatus.CLOSED);
 
         //모집전인 상태일 경우 작성자만 조회 가능
-        if (findStudy.getStudyStatus() == StudyStatus.BEFORE_RECRUITMENT) {
+        //진행중이지만 구인글 없을 경우 작성자만 조회 가능
+        StudyStatus studyStatus = findStudy.getStudyStatus();
+        if (studyStatus.equals(StudyStatus.BEFORE_RECRUITMENT) || (studyStatus.equals(StudyStatus.ONGOING) && findStudy.getOffer() == null)) {
             String email = SecurityContextHolder.getContext().getAuthentication().getName();
             User user = userRepository.findByEmail(email)
                     .orElseThrow(() -> new BusinessLogicException(ExceptionCode.ACCESS_FORBIDDEN));
@@ -350,9 +352,10 @@ public class StudyService {
         }
 
         return studies.stream()
-                .filter(study -> study.getStudyStatus().equals(StudyStatus.RECRUITING)
+                .filter(study -> (study.getStudyStatus().equals(StudyStatus.RECRUITING)
                         || study.getStudyStatus().equals(StudyStatus.ONGOING)
                         || study.getStudyStatus().equals(StudyStatus.END))
+                        && study.getOffer() != null)
                 .collect(Collectors.toList());
     }
 
